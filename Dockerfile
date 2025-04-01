@@ -11,8 +11,6 @@ ARG PYTHON_VERSION=3.12
 # --- Builder Image ---
 FROM python:${PYTHON_VERSION}-slim AS builder
 
-ARG COMPUTE_DEVICE=cpu
-
 WORKDIR /src
 
 # Install uv and its dependencies
@@ -43,17 +41,17 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /src
+ENV HOME=/src
 
 # Config for Tesseract
-#RUN apt-get update && apt-get install -y --no-install-recommends \
-#    tesseract-ocr \
-#    tesseract-ocr-fra \
-#    tesseract-ocr-eng \
-#    tesseract-ocr-deu \
-#    tesseract-ocr-spa \
-#    && apt-get clean \
-#    && rm -rf /var/lib/apt/lists/*
-ENV HOME=/src
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    tesseract-ocr \
+    tesseract-ocr-fra \
+    tesseract-ocr-eng \
+    tesseract-ocr-deu \
+    tesseract-ocr-spa \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user to run the application
 RUN addgroup --system app && \
