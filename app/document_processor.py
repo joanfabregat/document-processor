@@ -4,6 +4,7 @@
 #  Visit <https://www.codeinc.co> for more information
 
 import tempfile
+import time
 
 import fitz
 from PIL import Image
@@ -18,6 +19,12 @@ from tqdm import tqdm
 
 
 class DocumentProcessor:
+    """
+    A service to extract text content from a document using the SmolDocling model.
+
+    https://huggingface.co/ds4sd/SmolDocling-256M-preview
+    https://huggingface.co/ds4sd/SmolDocling-256M-preview-mlx-bf16
+    """
     MODEL_NAME = "ds4sd/SmolDocling-256M-preview-mlx-bf16"
 
     def __init__(self):
@@ -30,6 +37,16 @@ class DocumentProcessor:
             num_images=1
         )
         self.matrix = fitz.Matrix(3, 3)
+
+    @classmethod
+    def download_model(cls):
+        """
+        Download the model from Hugging Face.
+        """
+        logger.info(f"Downloading model {cls.MODEL_NAME}...")
+        start_time = time.time()
+        load(cls.MODEL_NAME)
+        logger.info(f"Model {cls.MODEL_NAME} downloaded successfully in {time.time() - start_time:.2f} seconds.")
 
     def process(self, pdf_path: str) -> list[models.Slice]:
         """

@@ -40,7 +40,7 @@ ENV COMMIT_SHA=${COMMIT_SHA}
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-ENV CACHE_DIR=/src/.cache
+ENV HF_HOME=/cache/huggingface
 
 WORKDIR /src
 ENV HOME=/src
@@ -71,8 +71,8 @@ COPY --chown=app:app app/ ./app
 USER app:app
 
 # Download the models
-RUN mkdir -p ${CACHE_DIR} &&  \
-    docling-tools models download layout|tableformer|code_formula|picture_classifier|easyocr --force --output-dir=${CACHE_DIR}
+RUN mkdir -p ${HF_HOME} &&  \
+    python -m app.download_models
 
 EXPOSE $PORT
 CMD ["sh", "-c", "uvicorn app.api:api --host 0.0.0.0 --port $PORT --workers 1 --log-level info --timeout-keep-alive 0"]

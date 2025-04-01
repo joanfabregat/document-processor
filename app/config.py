@@ -4,12 +4,8 @@
 #  Visit <https://www.codeinc.co> for more information
 
 import os
-from pathlib import Path
 
+DEBUG = os.getenv("DEBUG") == "1"
 VERSION = os.getenv("VERSION") or "v0.1.0"
 BUILD_ID = os.getenv("BUILD_ID") or "unknown"
 COMMIT_SHA = os.getenv("COMMIT_SHA") or "unknown"
-
-CACHE_DIR = os.getenv("CACHE_DIR") or str(Path(__file__).absolute().parent / ".cache")
-
-EASYOCR_SUPPORTED_LANGUAGES = ['en', 'fr', 'de', 'es']

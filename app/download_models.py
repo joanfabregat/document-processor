@@ -3,13 +3,6 @@
 #  Proprietary and confidential
 #  Visit <https://www.codeinc.co> for more information
 
-from time import time
+from app.document_processor import DocumentProcessor
 
-from docling.utils.model_downloader import download_models
-
-from app.logging import logger
-
-logger.info("Downloading models...")
-start = time()
-download_models(with_easyocr=True)
-logger.info(f"Models downloaded successfully in {time() - start:.2f} seconds.")
+DocumentProcessor.download_model()
