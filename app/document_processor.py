@@ -26,6 +26,7 @@ class DocumentProcessor:
     https://huggingface.co/ds4sd/SmolDocling-256M-preview-mlx-bf16
     """
     MODEL_NAME = "ds4sd/SmolDocling-256M-preview-mlx-bf16"
+    ZOOM_LEVEL = 3
 
     def __init__(self):
         self.model, self.processor = load(self.MODEL_NAME)
@@ -36,7 +37,7 @@ class DocumentProcessor:
             prompt="Convert this page to docling.",
             num_images=1
         )
-        self.matrix = fitz.Matrix(3, 3)
+        self.matrix = fitz.Matrix(self.ZOOM_LEVEL, self.ZOOM_LEVEL)
 
     @classmethod
     def download_model(cls):
@@ -120,8 +121,7 @@ class DocumentProcessor:
 
         return output
 
-    @staticmethod
-    def _extract_slices(document: DoclingDocument) -> list[models.Slice]:
+    def _extract_slices(self, document: DoclingDocument) -> list[models.Slice]:
         slices = []
         sequence = 0
         for item, level in document.iterate_items():
@@ -132,17 +132,17 @@ class DocumentProcessor:
                         ref=item.self_ref,
                         sequence=sequence,
                         parent_ref=item.parent.cref,
-                        label=str(item.label.value),
+                        label=item.label,
                         content=item.text if isinstance(item, TextItem) else item.export_to_markdown(),
                         content_mime_type="text/plain" if isinstance(item, TextItem) else "text/markdown",
                         positions=[
-                            models.SlicePosition(
+                            models.Slice.Position(
                                 page_no=prov.page_no,
-                                top=round(prov.bbox.t, 2),
-                                right=round(prov.bbox.r, 2),
-                                bottom=round(prov.bbox.b, 2),
-                                left=round(prov.bbox.l, 2),
-                                coord_origin=models.SlicePosition.CoordOrigin(prov.bbox.coord_origin.name)
+                                top=round(prov.bbox.t / self.ZOOM_LEVEL, 2),
+                                right=round(prov.bbox.r / self.ZOOM_LEVEL, 2),
+                                bottom=round(prov.bbox.b / self.ZOOM_LEVEL, 2),
+                                left=round(prov.bbox.l / self.ZOOM_LEVEL, 2),
+                                coord_origin=prov.bbox.coord_origin
                             ) for prov in item.prov
                         ]
                     )

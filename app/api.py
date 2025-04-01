@@ -49,8 +49,8 @@ async def health():
     )
 
 
-@api.post("/process", response_model=models.ProcessDocumentResponse)
-async def process_document(file: UploadFile = File(..., description="The PDF document to process")):
+@api.post("/process", response_model=models.ProcessResponse)
+async def process(file: UploadFile = File(..., description="The PDF document to process")):
     """
     Extract slices from a PDF document.
 
@@ -73,7 +73,7 @@ async def process_document(file: UploadFile = File(..., description="The PDF doc
 
         try:
             slices = doc_processor.process(temp_file.name)
-            return models.ProcessDocumentResponse(
+            return models.ProcessResponse(
                 document=file.filename,
                 size=os.path.getsize(temp_file_path),
                 content_type=file.content_type,
