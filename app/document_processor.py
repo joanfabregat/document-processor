@@ -55,7 +55,6 @@ class DocumentProcessor:
 
         Args:
             pdf_path: The path to the file.
-            raises_on_error: Whether to raise an error if the extraction fails.
 
         Returns:
             A list of document slices.
