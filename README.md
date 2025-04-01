@@ -1,5 +1,7 @@
 # Sophos Document Processing API
 
+[![Build and Push to GHCR and Docker Hub](https://github.com/joanfabregat/document-processor/actions/workflows/build-and-deploy.yaml/badge.svg)](https://github.com/joanfabregat/document-processor/actions/workflows/build-and-deploy.yaml)
+
 ## Overview
 
 Sophos is a FastAPI-based service that processes documents and extracts structured content as "slices". The API takes document files (primarily PDFs) as input and returns a structured representation of the document content, preserving the document hierarchy, positioning, and formatting.
