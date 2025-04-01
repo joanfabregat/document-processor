@@ -32,7 +32,7 @@ with _lock:
         ),
         do_ocr=True,
         # https://docling-project.github.io/docling/examples/tesseract_lang_detection/
-        # ocr_options=TesseractCliOcrOptions(lang=["auto"], force_full_page_ocr=True),
+        # ocr_options=TesseractCliOcrOptions(lang=["auto"], force_full_page_ocr=False),
         ocr_options=EasyOcrOptions(force_full_page_ocr=True, download_enabled=True),
         do_table_structure=True,
         table_structure_options=TableStructureOptions(
@@ -72,17 +72,17 @@ def process_file(file_path: str, raises_on_error: bool = True) -> list[models.Sl
                     ref=item.self_ref,
                     sequence=sequence,
                     parent_ref=item.parent.cref,
-                    label=str(item.label.value),
+                    label=item.label,
                     content=item.text if isinstance(item, TextItem) else item.export_to_markdown(),
                     content_mime_type="text/plain" if isinstance(item, TextItem) else "text/markdown",
                     positions=[
-                        models.SlicePosition(
+                        models.Slice.Position(
                             page_no=prov.page_no,
                             top=round(prov.bbox.t, 2),
                             right=round(prov.bbox.r, 2),
                             bottom=round(prov.bbox.b, 2),
                             left=round(prov.bbox.l, 2),
-                            coord_origin=models.SlicePosition.CoordOrigin(prov.bbox.coord_origin.name)
+                            coord_origin=prov.bbox.coord_origin
                         ) for prov in item.prov
                     ]
                 )

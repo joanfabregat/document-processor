@@ -43,7 +43,7 @@ async def health():
     )
 
 
-@api.post("/process", response_model=models.ProcessDocumentResponse)
+@api.post("/process", response_model=models.ProcessResponse)
 async def process_document(file: UploadFile = File(..., description="The PDF document to process")):
     """
     Extract slices from a PDF document.
@@ -61,13 +61,13 @@ async def process_document(file: UploadFile = File(..., description="The PDF doc
             detail="Invalid file type. Only PDF files are supported.",
         )
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1]) as temp_file:
+    with tempfile.NamedTemporaryFile(delete=False, suffix="pdf") as temp_file:
         shutil.copyfileobj(file.file, temp_file)
         temp_file_path = temp_file.name
 
     try:
         slices = process_file(temp_file.name)
-        return models.ProcessDocumentResponse(
+        return models.ProcessResponse(
             document=file.filename,
             size=os.path.getsize(temp_file_path),
             content_type=file.content_type,

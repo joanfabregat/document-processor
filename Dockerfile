@@ -39,6 +39,7 @@ ENV COMMIT_SHA=${COMMIT_SHA}
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV DOCLING_MODELS=/cache/docling
 
 WORKDIR /src
 ENV HOME=/src
@@ -67,6 +68,10 @@ COPY --chown=app:app app/ ./app
 
 # Ensure a non-root user
 USER app:app
+
+# Docling the Docling models
+RUN mkdir -p ${DOCLING_MODELS} && \
+    docling-tools models download --force --output-dir=${DOCLING_MODELS}
 
 EXPOSE $PORT
 CMD ["sh", "-c", "uvicorn app.api:api --host 0.0.0.0 --port $PORT --workers 1 --log-level info --timeout-keep-alive 0"]
