@@ -1,0 +1,15 @@
+[project]
+name = "document-processor"
+version = "v0.1.0"
+description = "A document processor based on Docling and Tesseract."
+authors = [
+    { name = "Joan Fabrégat", email = "jfabregat@fogandfrog.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "docling>=2.28.4",
+    "fastapi>=0.115.11",
+    "pydantic>=2.11.1",
+    "python-multipart>=0.0.20",
+    "uvicorn>=0.34.0",
+]

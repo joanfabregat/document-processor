@@ -1,0 +1,15 @@
+name: document_processor
+services:
+  document_processor:
+    container_name: document_processor
+    image: document-processor:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      platforms:
+        #- linux/amd64
+        - linux/arm64
+      args:
+        - PORT=80
+    ports:
+      - "8000:80"
