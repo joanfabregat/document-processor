@@ -1,5 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="FastAPI" type="Python.FastAPI">
+    <option name="additionalOptions" value="--reload --port=8001" />
     <option name="file" value="$PROJECT_DIR$/app/api.py" />
     <module name="document-processor" />
     <option name="ENV_FILES" value="" />
