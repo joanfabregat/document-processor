@@ -40,4 +40,7 @@ class HealthResponse(BaseModel):
 
 
 class ProcessDocumentResponse(BaseModel):
+    document: str = Field(..., description="The document name")
+    size: int = Field(..., description="The size of the document in bytes")
+    content_type: str = Field(..., description="The MIME type of the document")
     slices: list[Slice] = Field(..., description="The slices extracted from the document")

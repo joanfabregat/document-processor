@@ -67,7 +67,12 @@ async def process_document(file: UploadFile = File(..., description="The PDF doc
 
     try:
         slices = process_file(temp_file.name)
-        return models.ProcessDocumentResponse(slices=slices)
+        return models.ProcessDocumentResponse(
+            document=file.filename,
+            size=os.path.getsize(temp_file_path),
+            content_type=file.content_type,
+            slices=slices
+        )
 
     except Exception as e:
         logger.error(f"Error processing file: {str(e)}")
