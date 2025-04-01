@@ -12,10 +12,16 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 
 from app import models
 from app.config import VERSION, BUILD_ID, COMMIT_SHA
-from app.document_processor import process_file
+from app.document_processor import DocumentProcessor
 from app.logging import logger
 
 start_dt = datetime.datetime.now()
+
+##
+# Initialize the document processor
+##
+logger.info("Initializing document processor...")
+doc_processor = DocumentProcessor()
 
 ##
 # Start FastAPI app
@@ -61,23 +67,19 @@ async def process_document(file: UploadFile = File(..., description="The PDF doc
             detail="Invalid file type. Only PDF files are supported.",
         )
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1]) as temp_file:
+    with tempfile.NamedTemporaryFile(suffix=os.path.splitext(file.filename)[1]) as temp_file:
         shutil.copyfileobj(file.file, temp_file)
         temp_file_path = temp_file.name
 
-    try:
-        slices = process_file(temp_file.name)
-        return models.ProcessDocumentResponse(
-            document=file.filename,
-            size=os.path.getsize(temp_file_path),
-            content_type=file.content_type,
-            slices=slices
-        )
+        try:
+            slices = doc_processor.process(temp_file.name)
+            return models.ProcessDocumentResponse(
+                document=file.filename,
+                size=os.path.getsize(temp_file_path),
+                content_type=file.content_type,
+                slices=slices
+            )
 
-    except Exception as e:
-        logger.error(f"Error processing file: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
-
-    finally:
-        if os.path.exists(temp_file_path):
-            os.unlink(temp_file_path)
+        except Exception as e:
+            logger.error(f"Error processing file: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
