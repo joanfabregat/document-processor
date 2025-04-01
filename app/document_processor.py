@@ -10,7 +10,7 @@ from docling.datamodel.pipeline_options import (
     AcceleratorOptions,
     AcceleratorDevice,
     EasyOcrOptions,
-    TesseractOcrOptions,
+    TesseractCliOcrOptions,
     TableStructureOptions,
 )
 from docling.document_converter import DocumentConverter, InputFormat, PdfFormatOption
