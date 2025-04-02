@@ -33,10 +33,6 @@ class HealthResponse(BaseModel):
     up_since: str = Field(..., description="The date and time when the service started")
 
 
-class ProcessRequest(BaseModel):
-    file: bytes = Field(..., description="The PDF document to process")
-    content_type: str = Field("application/pdf", description="The MIME type of the document")
-
 class ProcessResponse(BaseModel):
     document: str = Field(..., description="The document name")
     size: int = Field(..., description="The size of the document in bytes")

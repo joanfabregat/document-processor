@@ -9,9 +9,9 @@ from docling.datamodel.pipeline_options import (
     PdfPipelineOptions,
     AcceleratorOptions,
     AcceleratorDevice,
-    EasyOcrOptions,
     TesseractCliOcrOptions,
     TableStructureOptions,
+    TableFormerMode,
 )
 from docling.document_converter import DocumentConverter, InputFormat, PdfFormatOption
 from docling_core.types.doc.document import TextItem, TableItem
@@ -31,12 +31,16 @@ with _lock:
             device=AcceleratorDevice.AUTO
         ),
         do_ocr=True,
-        # https://docling-project.github.io/docling/examples/tesseract_lang_detection/
-        # ocr_options=TesseractCliOcrOptions(lang=["auto"], force_full_page_ocr=False),
-        ocr_options=EasyOcrOptions(force_full_page_ocr=True, download_enabled=True),
+        ocr_options=TesseractCliOcrOptions(
+            lang=["auto"],  # https://docling-project.github.io/docling/examples/tesseract_lang_detection/
+            force_full_page_ocr=False,
+            bitmap_area_threshold=.25
+        ),
         do_table_structure=True,
+        images_scale=2.0,
         table_structure_options=TableStructureOptions(
             do_cell_matching=True,
+            mode=TableFormerMode.FAST,
         )
     )
 
