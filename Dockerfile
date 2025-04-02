@@ -27,7 +27,7 @@ RUN uv sync --frozen
 # --- Final Image ---
 FROM python:${PYTHON_VERSION}-slim AS final
 
-ARG PORT=80
+ARG PORT=8000
 ARG VERSION
 ARG BUILD_ID
 ARG COMMIT_SHA
