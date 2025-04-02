@@ -1,3 +1,10 @@
+<!--
+  ~ Copyright (c) 2025 Code Inc. - All Rights Reserved
+  ~ Unauthorized copying of this file, via any medium is strictly prohibited
+  ~ Proprietary and confidential
+  ~ Visit <https://www.codeinc.co> for more information
+  -->
+
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Docker" type="docker-deploy" factoryName="docker-compose.yml" server-name="Docker">
     <deployment type="docker-compose.yml">
