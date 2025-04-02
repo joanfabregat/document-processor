@@ -63,15 +63,18 @@ RUN addgroup --system app && \
 COPY --from=builder --chown=app:app /src/.venv .venv
 ENV PATH="/src/.venv/bin:$PATH"
 
+# create a cache directory for docling models
+RUN mkdir -p ${DOCLING_MODELS} && \
+    chown -R app:app ${DOCLING_MODELS}
+
 # Copy the application code
 COPY --chown=app:app app/ ./app
 
 # Ensure a non-root user
 USER app:app
 
-# Docling the Docling models
-RUN mkdir -p ${DOCLING_MODELS} && \
-    docling-tools models download --force --output-dir=${DOCLING_MODELS}
+# Download docling models
+RUN docling-tools models download --force --output-dir=${DOCLING_MODELS}
 
 EXPOSE $PORT
 CMD ["sh", "-c", "uvicorn app.api:api --host 0.0.0.0 --port $PORT --workers 1 --log-level info --timeout-keep-alive 0"]
