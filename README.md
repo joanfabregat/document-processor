@@ -1,10 +1,10 @@
-# Sophos Document Processing API
+# Document Processor
 
 [![Build and Push to GHCR and Docker Hub](https://github.com/joanfabregat/document-processor/actions/workflows/build-and-deploy.yaml/badge.svg)](https://github.com/joanfabregat/document-processor/actions/workflows/build-and-deploy.yaml)
 
 ## Overview
 
-Sophos is a FastAPI-based service that processes documents and extracts structured content as "slices". The API takes document files (primarily PDFs) as input and returns a structured representation of the document content, preserving the document hierarchy, positioning, and formatting.
+Document Processor is a FastAPI-based service that processes documents and extracts structured content as "slices". The API takes document files (primarily PDFs) as input and returns a structured representation of the document content, preserving the document hierarchy, positioning, and formatting.
 
 ## Features
 
@@ -144,27 +144,14 @@ Represents the position of a slice on a document page:
 
 ## Setup and Deployment
 
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/codeinc/sophos-api.git
-cd sophos-api
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-### Configuration
-
-Environment variables:
-- `VERSION`: API version
-- `BUILD_ID`: Build identifier
-- `COMMIT_SHA`: Git commit SHA
-
 ### Running the API
 
+You can run the API using Docker or directly with Uvicorn.
+
 ```bash
+# Docker 
+docker run --rm -p 8000:8000 joanfabregat/document-processor:latest
+
 # Development
 uvicorn app.api:api --reload
 
