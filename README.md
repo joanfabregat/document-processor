@@ -161,4 +161,4 @@ uvicorn app.api:api --host 0.0.0.0 --port 8000
 
 ## License
 
-The Document Processor is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+The Document Processor is licensed under the MIT License. See the [LICENSE](https://github.com/joanfabregat/document-processor/blob/main/LICENCE) file for details.
