@@ -8,12 +8,9 @@ import os
 import shutil
 import tempfile
 
+from app import models, logger, config
+from app.document_processor import DocumentProcessor
 from fastapi import FastAPI, UploadFile, File, HTTPException
-
-from app import models
-from app.config import VERSION, BUILD_ID, COMMIT_SHA
-from app.document_processor import process_file
-from app.logging import logger
 
 start_dt = datetime.datetime.now()
 
@@ -23,7 +20,7 @@ start_dt = datetime.datetime.now()
 logger.info("Starting FastAPI app...")
 api = FastAPI(
     title="Sophos inferencing API",
-    version=VERSION,
+    version=config.VERSION,
 )
 
 
@@ -36,9 +33,9 @@ async def health():
     Root endpoint.
     """
     return models.HealthResponse(
-        version=VERSION,
-        build_id=BUILD_ID,
-        commit_sha=COMMIT_SHA,
+        version=config.VERSION,
+        build_id=config.BUILD_ID,
+        commit_sha=config.COMMIT_SHA,
         up_since=start_dt.strftime("%Y-%m-%d %H:%M:%S"),
     )
 
@@ -62,15 +59,19 @@ async def process_document(file: UploadFile = File(..., description="The PDF doc
         )
 
     with tempfile.NamedTemporaryFile(delete=False, suffix="pdf") as temp_file:
+        # noinspection PyTypeChecker
         shutil.copyfileobj(file.file, temp_file)
         temp_file_path = temp_file.name
 
     try:
-        slices = process_file(temp_file.name)
+        doc_proc = DocumentProcessor.from_file(temp_file.name, bbox_precision=config.BBOX_PRECISION)
+        pages = doc_proc.process_pages()
+        slices = doc_proc.process_slices()
         return models.ProcessResponse(
             document=file.filename,
             size=os.path.getsize(temp_file_path),
             content_type=file.content_type,
+            pages=pages,
             slices=slices
         )
 

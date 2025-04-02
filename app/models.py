@@ -7,8 +7,18 @@ from docling_core.types import doc as docling_types
 from pydantic import BaseModel, Field
 
 
+class Page(BaseModel):
+    """Represents a page in a document."""
+    page_no: int = Field(..., description="The page number of the document")
+    width: float = Field(..., description="The width of the page")
+    height: float = Field(..., description="The height of the page")
+
+
 class Slice(BaseModel):
+    """Represents a slice of content extracted from a document."""
+
     class Position(BaseModel):
+        """Represents the position of a slice in a document."""
         page_no: int = Field(..., description="The page number of the slice")
         top: float = Field(..., description="The top position of the slice")
         right: float = Field(..., description="The right position of the slice")
@@ -23,10 +33,15 @@ class Slice(BaseModel):
     label: docling_types.DocItemLabel = Field(..., description="The label of the slice")
     content: str = Field(..., description="The content of the slice")
     content_mime_type: str = Field(..., description="The MIME type of the content")
+    raw_content: str | list | None = Field(
+        ...,
+        description="The raw content of the slice (either the unprocessed text or the raw table data)"
+    )
     positions: list[Position] = Field(default_factory=list, description="The positions of the slice in the document")
 
 
 class HealthResponse(BaseModel):
+    """Response model for the health check endpoint."""
     version: str = Field(..., description="The version of the service")
     build_id: str = Field(..., description="The build ID of the service")
     commit_sha: str = Field(..., description="The commit SHA of the service")
@@ -34,7 +49,9 @@ class HealthResponse(BaseModel):
 
 
 class ProcessResponse(BaseModel):
+    """Response model for the document processing endpoint."""
     document: str = Field(..., description="The document name")
     size: int = Field(..., description="The size of the document in bytes")
     content_type: str = Field(..., description="The MIME type of the document")
+    pages: list[Page] = Field(..., description="The pages of the document")
     slices: list[Slice] = Field(..., description="The slices extracted from the document")
