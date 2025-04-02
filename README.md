@@ -161,6 +161,4 @@ uvicorn app.api:api --host 0.0.0.0 --port 8000
 
 ## License
 
-Copyright (c) 2025 Code Inc. - All Rights Reserved. Unauthorized copying of this file, via any medium is strictly prohibited. Proprietary and confidential.
-
-Visit [https://www.codeinc.co](https://www.codeinc.co) for more information.
+The Document Processor is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
