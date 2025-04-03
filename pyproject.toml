@@ -7,7 +7,7 @@
 
 [project]
 name = "document-processor"
-version = "v0.1.0"
+version = "v0.2.0"
 description = "A document processor based on Docling and Tesseract."
 authors = [
     { name = "Joan Fabrégat", email = "jfabregat@fogandfrog.com" }
