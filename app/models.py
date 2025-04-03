@@ -35,10 +35,7 @@ class Slice(BaseModel):
     label: docling_types.DocItemLabel = Field(..., description="The label of the slice")
     content: str = Field(..., description="The content of the slice")
     content_mime_type: str = Field(..., description="The MIME type of the content")
-    raw_content: str | list | None = Field(
-        ...,
-        description="The raw content of the slice (either the unprocessed text or the raw table data)"
-    )
+    table_data: list | None = Field(..., description="The table data of the slice (if applicable)")
     positions: list[Position] = Field(default_factory=list, description="The positions of the slice in the document")
 
 

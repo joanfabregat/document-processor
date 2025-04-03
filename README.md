@@ -56,6 +56,7 @@ Returns a list of document slices, each containing:
 - Label
 - Content
 - Content MIME type (text/plain or text/markdown)
+- Table data
 - Positions (coordinates of the content on document pages)
 
 **Response Example:**
@@ -71,6 +72,7 @@ Returns a list of document slices, each containing:
       "label": "Title",
       "content": "Document Title",
       "content_mime_type": "text/plain",
+      "table_data": null,
       "positions": [
         {
           "page_no": 1,
@@ -134,6 +136,7 @@ Represents a piece of content extracted from the document:
 - `label`: Content label/type
 - `content`: Actual text content
 - `content_mime_type`: MIME type of the content (text/plain or text/markdown)
+- `table_data`: Optional table data (if applicable)
 - `positions`: List of position information
 
 #### SlicePosition

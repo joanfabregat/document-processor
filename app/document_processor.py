@@ -5,10 +5,10 @@
 # restriction, subject to the conditions in the full MIT License.
 # The Software is provided "as is", without warranty of any kind.
 
+from docling_core.types.doc.document import TextItem, TableItem, DoclingDocument
+
 from app import logger, models
 from app.dl_converter import dl_converter
-from docling_core.types.doc.document import TextItem, TableItem, DoclingDocument
-import pandas as pd
 
 
 class DocumentProcessor:
@@ -98,15 +98,14 @@ class DocumentProcessor:
         try:
             for item, level in self.document.iterate_items():
                 if isinstance(item, TableItem):
+                    content_mime_type = "text/markdown"
                     content = item.export_to_markdown(self.document)
                     df = item.export_to_dataframe()
-                    raw_content = [df.columns.tolist()] + df.values.tolist()
-                    content_mime_type = "text/markdown"
+                    table_data = [df.columns.tolist()] + df.values.tolist()
                 elif isinstance(item, TextItem):
-                    content = item.text
-                    raw_content = item.orig
-                    table_data = None
                     content_mime_type = "text/plain"
+                    content = item.text
+                    table_data = None
                 else:
                     continue  # Other types of items are ignored
 
@@ -118,7 +117,7 @@ class DocumentProcessor:
                         parent_ref=item.parent.cref if item.parent else None,
                         label=item.label,
                         content=content,
-                        raw_content=raw_content,
+                        table_data=table_data,
                         content_mime_type=content_mime_type,
                         positions=[
                             models.Slice.Position(
