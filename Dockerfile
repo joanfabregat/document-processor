@@ -39,7 +39,8 @@ ENV COMMIT_SHA=${COMMIT_SHA}
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-ENV DOCLING_MODELS=/cache/docling
+ENV HF_HOME=/src/.cache/huggingface
+ENV DOCLING_MODELS=${HF_HOME}
 
 WORKDIR /src
 ENV HOME=/src
@@ -74,7 +75,8 @@ COPY --chown=app:app app/ ./app
 USER app:app
 
 # Download docling models
-RUN docling-tools models download --force --output-dir=${DOCLING_MODELS}
+RUN docling-tools models download layout --force --output-dir=${DOCLING_MODELS} && \
+    docling-tools models download tableformer --force --output-dir=${DOCLING_MODELS}
 
 EXPOSE $PORT
 CMD ["sh", "-c", "uvicorn app.api:api --host 0.0.0.0 --port $PORT --workers 1 --log-level info --timeout-keep-alive 0"]
