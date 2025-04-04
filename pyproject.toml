@@ -19,12 +19,16 @@ dependencies = [
     "pydantic>=2.11.1",
     "python-multipart>=0.0.20",
     "uvicorn>=0.34.0",
-    "torch>=2.2.0",
+    "torch>=2.6.0",
+    "torchvision>=0.21.0",
 ]
 
 # https://docs.astral.sh/uv/guides/integration/pytorch/#using-a-pytorch-index
 [tool.uv.sources]
 torch = [
+    { index = "pytorch-cpu" },
+]
+torchvision = [
     { index = "pytorch-cpu" },
 ]
 
