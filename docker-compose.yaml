@@ -14,8 +14,8 @@ services:
       context: .
       dockerfile: Dockerfile
       platforms:
-        #- linux/amd64
-        - linux/arm64
+        - linux/amd64
+#        - linux/arm64
       args:
         - PORT=80
     ports:
