@@ -73,8 +73,6 @@ async def process_document(
             detail="Invalid file type. Only PDF files are supported.",
         )
 
-
-
     with tempfile.NamedTemporaryFile(delete=False, suffix="pdf") as temp_file:
         # noinspection PyTypeChecker
         shutil.copyfileobj(file.file, temp_file)
@@ -85,14 +83,15 @@ async def process_document(
 
     if last_page is None:
         last_page = sys.maxsize
+
     page_range = (max(1, first_page), min(pages_count, last_page))
 
     try:
         pages = process_file(
             temp_file_path,
             extract_images=include_images,
-            raises_on_error=True,
-            page_range=(first_page, last_page),
+            raises_on_error=False,
+            page_range=page_range,
         )
 
         return models.ProcessResponse(

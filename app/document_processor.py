@@ -66,7 +66,7 @@ def process_file(
         )
 
         # If the page has no slices, use the fallback DL converter
-        if not page.slices:
+        if not page or not page.slices:
             logger.debug(f"Page {page_no} has no slice, using full OCR converter")
 
             # Use the fallback DL converter to convert the page to a Docling document
@@ -85,10 +85,9 @@ def process_file(
                 raises_on_error=raises_on_error,
             )
 
-        sequence += len(page.slices)
-
-        # Add the extracted slices
-        pages.append(page)
+        if page:
+            sequence += len(page.slices)
+            pages.append(page)
 
     return pages
 
@@ -118,12 +117,13 @@ def _extract_document_page(
     """
     logger.info(f"Extracting slices from Docling document")
 
-    page = document.pages[page_no]
-    if not page:
+    if not page_no in document.pages:
         logger.warning(f"Page {page_no} not found in Docling document")
         if raises_on_error:
             raise ValueError(f"Page {page_no} not found in Docling document")
         return None
+
+    page = document.pages[page_no]
 
     return models.Page(
         page_no=page.page_no,
@@ -253,7 +253,7 @@ def _convert_node_item_to_slice(
         sequence=sequence,
         parent_ref=item.parent.cref if item.parent else None,
         label=item.label,
-        text_content=text_content,
+        content_text=text_content,
         markdown_content=markdown_content,
         caption_text=caption_text,
         table_data=table_data,

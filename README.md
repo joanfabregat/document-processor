@@ -13,6 +13,8 @@ Document Processor is a FastAPI-based service that processes documents and extra
 - Precise positioning information for each content slice
 - Optional image extraction
 - Page range selection for processing
+- Table data extraction in multiple formats (Markdown and structured data)
+- Support for captions in tables and images
 
 ## API Endpoints
 
@@ -54,8 +56,8 @@ Returns a structured representation of the document, including:
 - Document metadata (name, size, content type)
 - Page count information (total pages, first and last page processed)
 - List of pages, each containing:
-    - Page metadata (page number, width, height)
-    - List of slices on the page
+  - Page metadata (page number, width, height)
+  - List of slices on the page
 
 **Response Example:**
 
@@ -78,9 +80,11 @@ Returns a structured representation of the document, including:
           "ref": "ref123",
           "sequence": 0,
           "parent_ref": "parent_ref",
-          "label": "Title",
-          "content": "Document Title",
-          "content_mime_type": "text/plain",
+          "label": "HEADING",
+          "content_text": "Document Title",
+          "caption_text": null,
+          "markdown_content": null,
+          "table_data": null,
           "png_image": null,
           "positions": [
             {
@@ -88,6 +92,28 @@ Returns a structured representation of the document, including:
               "top": 100.0,
               "right": 500.0,
               "bottom": 120.0,
+              "left": 50.0,
+              "coord_origin": "TOPLEFT"
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "ref": "ref124",
+          "sequence": 1,
+          "parent_ref": "ref123",
+          "label": "TABLE",
+          "content_text": null,
+          "caption_text": "Table 1: Sample Data",
+          "markdown_content": "| Header 1 | Header 2 |\n|---------|----------|\n| Data 1 | Data 2 |",
+          "table_data": [["Header 1", "Header 2"], ["Data 1", "Data 2"]],
+          "png_image": "base64encodedimage...",
+          "positions": [
+            {
+              "page_no": 1,
+              "top": 150.0,
+              "right": 500.0,
+              "bottom": 200.0,
               "left": 50.0,
               "coord_origin": "TOPLEFT"
             }
@@ -116,6 +142,7 @@ The API uses a document processing pipeline that includes:
 - Content extraction and organization into slices
 - Optional image extraction
 - Positional information tracking
+- Table data extraction in multiple formats
 
 ### Data Models
 
@@ -132,10 +159,12 @@ Represents a piece of content extracted from the document:
 - `ref`: Reference ID
 - `sequence`: Sequential order in the document
 - `parent_ref`: Reference to parent element
-- `label`: Content label/type
-- `content`: Actual content (text, list, or null)
-- `content_mime_type`: MIME type of the content (text/plain or text/json)
-- `png_image`: Optional base64 encoded PNG image (if applicable)
+- `label`: Content label/type (e.g., HEADING, PARAGRAPH, TABLE, PICTURE)
+- `content_text`: The text content of the slice
+- `caption_text`: The caption of the slice (for tables and pictures)
+- `markdown_content`: The Markdown content of the slice (for tables)
+- `table_data`: The table data associated with the slice (for tables)
+- `png_image`: Optional base64 encoded PNG image (for tables and pictures)
 - `positions`: List of position information
 
 #### SlicePosition

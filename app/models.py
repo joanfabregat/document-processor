@@ -29,7 +29,7 @@ class Page(BaseModel):
         sequence: int = Field(..., description="The sequence number of the slice in the document")
         parent_ref: str = Field(..., description="The reference ID of the parent slice")
         label: docling_types.DocItemLabel = Field(..., description="The label of the slice")
-        text_content: str | None = Field(..., description="The text content of the slice")
+        content_text: str | None = Field(..., description="The content text of the slice")
         caption_text: str | None = Field(..., description="The caption of the slice (for tables and pictures)")
         markdown_content: str | None = Field(..., description="The Markdown content of the slice (for tables)")
         table_data: list[list] | None = Field(..., description="The table data associated with the slice (for tables)")
