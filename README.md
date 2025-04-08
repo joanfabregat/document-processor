@@ -83,7 +83,7 @@ Returns a structured representation of the document, including:
           "label": "HEADING",
           "content_text": "Document Title",
           "caption_text": null,
-          "markdown_content": null,
+          "content_markdown": null,
           "table_data": null,
           "png_image": null,
           "positions": [
@@ -105,7 +105,7 @@ Returns a structured representation of the document, including:
           "label": "TABLE",
           "content_text": null,
           "caption_text": "Table 1: Sample Data",
-          "markdown_content": "| Header 1 | Header 2 |\n|---------|----------|\n| Data 1 | Data 2 |",
+          "content_markdown": "| Header 1 | Header 2 |\n|---------|----------|\n| Data 1 | Data 2 |",
           "table_data": [["Header 1", "Header 2"], ["Data 1", "Data 2"]],
           "png_image": "base64encodedimage...",
           "positions": [
@@ -162,7 +162,7 @@ Represents a piece of content extracted from the document:
 - `label`: Content label/type (e.g., HEADING, PARAGRAPH, TABLE, PICTURE)
 - `content_text`: The text content of the slice
 - `caption_text`: The caption of the slice (for tables and pictures)
-- `markdown_content`: The Markdown content of the slice (for tables)
+- `content_markdown`: The Markdown content of the slice (for tables)
 - `table_data`: The table data associated with the slice (for tables)
 - `png_image`: Optional base64 encoded PNG image (for tables and pictures)
 - `positions`: List of position information

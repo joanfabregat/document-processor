@@ -214,7 +214,7 @@ def _convert_node_item_to_slice(
     png_image = None
     caption_text = None
     table_data = None
-    markdown_content = None
+    content_markdown = None
     text_content = None
     has_content = False
 
@@ -231,9 +231,9 @@ def _convert_node_item_to_slice(
         if extract_images:
             png_image = _extract_item_png_image(document, item)
         caption_text = _extract_item_caption_text(document, item)
-        markdown_content = _export_to_markdown(document, item)
+        content_markdown = _export_to_markdown(document, item)
         table_data = _extract_item_table_data(item)
-        if table_data or markdown_content:
+        if table_data or content_markdown:
             has_content = True
 
     # Text content
@@ -254,7 +254,7 @@ def _convert_node_item_to_slice(
         parent_ref=item.parent.cref if item.parent else None,
         label=item.label,
         content_text=text_content,
-        markdown_content=markdown_content,
+        content_markdown=content_markdown,
         caption_text=caption_text,
         table_data=table_data,
         png_image=png_image,

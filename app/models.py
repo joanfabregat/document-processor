@@ -31,7 +31,7 @@ class Page(BaseModel):
         label: docling_types.DocItemLabel = Field(..., description="The label of the slice")
         content_text: str | None = Field(..., description="The content text of the slice")
         caption_text: str | None = Field(..., description="The caption of the slice (for tables and pictures)")
-        markdown_content: str | None = Field(..., description="The Markdown content of the slice (for tables)")
+        content_markdown: str | None = Field(..., description="The Markdown content of the slice (for tables)")
         table_data: list[list] | None = Field(..., description="The table data associated with the slice (for tables)")
         png_image: str | None = Field(..., description="Base64 encoded PNG image associated with the slice "
                                                        "(for tables and pictures)")
