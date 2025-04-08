@@ -8,11 +8,14 @@
 import datetime
 import os
 import shutil
+import sys
 import tempfile
 
-from app import models, logger, config
-from app.document_processor import DocumentProcessor
+import pymupdf
 from fastapi import FastAPI, UploadFile, File, HTTPException
+
+from app import models, logger, config
+from app.document_processor import process_file
 
 start_dt = datetime.datetime.now()
 
@@ -23,6 +26,7 @@ logger.info("Starting FastAPI app...")
 api = FastAPI(
     title="Sophos inferencing API",
     version=config.VERSION,
+    debug=config.ENV == "development",
 )
 
 
@@ -43,12 +47,20 @@ async def health():
 
 
 @api.post("/process", response_model=models.ProcessResponse)
-async def process_document(file: UploadFile = File(..., description="The PDF document to process")):
+async def process_document(
+        file: UploadFile = File(..., description="The PDF document to process"),
+        include_images: bool = False,
+        first_page: int = 1,
+        last_page: int = sys.maxsize,
+):
     """
     Extract slices from a PDF document.
 
     Args:
         file: The PDF document to process.
+        include_images: Whether to include images in the response.
+        first_page: The first page to process.
+        last_page: The last page to process.
 
     Returns:
         The list of slices extracted from the document.
@@ -65,21 +77,33 @@ async def process_document(file: UploadFile = File(..., description="The PDF doc
         shutil.copyfileobj(file.file, temp_file)
         temp_file_path = temp_file.name
 
+    with pymupdf.open(temp_file_path) as pdf:
+        pages_count = len(pdf)
+
+    page_range = (max(1, first_page), min(pages_count, last_page))
+
     try:
-        doc_proc = DocumentProcessor.from_file(temp_file.name, bbox_precision=config.BBOX_PRECISION)
-        pages = doc_proc.process_pages()
-        slices = doc_proc.process_slices()
+        pages = process_file(
+            temp_file_path,
+            extract_images=include_images,
+            raises_on_error=True,
+            page_range=(first_page, last_page),
+        )
+
         return models.ProcessResponse(
             document=file.filename,
             size=os.path.getsize(temp_file_path),
             content_type=file.content_type,
+            first_page=page_range[0],
+            last_page=page_range[1],
+            total_pages=pages_count,
             pages=pages,
-            slices=slices
         )
 
     except Exception as e:
         logger.error(f"Error processing file: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
+        raise e
+        # raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}") from e
 
     finally:
         if os.path.exists(temp_file_path):

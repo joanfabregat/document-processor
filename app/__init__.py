@@ -6,14 +6,13 @@
 # The Software is provided "as is", without warranty of any kind.
 
 import logging
+from . import config
 
-# Create logger
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.DEBUG if config.ENV == "development" else logging.INFO)
 logger.propagate = False
 
-# Add console handler if not already added
 if not logger.handlers:
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(level=logging.INFO)
-    logger.addHandler(console_handler)
+    _console_handler = logging.StreamHandler()
+    _console_handler.setLevel(level=logger.level)
+    logger.addHandler(_console_handler)

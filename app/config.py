@@ -1,28 +1,31 @@
-# Copyright (c) 2025 Joan Fabrégat <j@fabreg.at>
-# Permission is hereby granted, free of charge, to any person
-# obtaining a copy of this software and associated documentation
-# files (the "Software"), to deal in the Software without
-# restriction, subject to the conditions in the full MIT License.
-# The Software is provided "as is", without warranty of any kind.
+#  Copyright (c) 2025 Joan Fabrégat <j@fabreg.at>
+#  Permission is hereby granted, free of charge, to any person
+#  obtaining a copy of this software and associated documentation
+#  files (the "Software"), to deal in the Software without
+#  restriction, subject to the conditions in the full MIT License.
+#  The Software is provided "as is", without warranty of any kind.
 
 import os
+from pathlib import Path
 
-from docling.datamodel.pipeline_options import AcceleratorDevice, TableFormerMode
+from dotenv import load_dotenv
 
-VERSION = os.getenv("VERSION") or "v0.1.0"
-BUILD_ID = os.getenv("BUILD_ID") or "unknown"
-COMMIT_SHA = os.getenv("COMMIT_SHA") or "unknown"
+# Load environment variables from .env files
+_config_dir = Path(__file__).resolve().parent.parent
+if os.path.isfile(_config_dir / '.env'):
+    load_dotenv(dotenv_path=_config_dir / '.env')
+if os.path.isfile(_config_dir / '.env.local'):
+    load_dotenv(dotenv_path=_config_dir / '.env.local', override=True)
 
-# Document processor
-BBOX_PRECISION = 1
+# Define constants for the application
+ENV: str = os.getenv("ENV", "development")
+THREADS: int = int(os.getenv("THREADS", 4))
+VERSION: str = os.getenv("VERSION")
+BUILD_ID: str = os.getenv("BUILD_ID")
+COMMIT_SHA: str = os.getenv("COMMIT_SHA")
 
-# Docling converter
-DL_CONVERTER_ACCELERATOR = AcceleratorDevice.CPU
-DL_CONVERTER_THREADS = 4
-DL_CONVERTER_IMAGE_SCALE = 2.0
-DL_CONVERTER_FORCE_FULL_PAGE_OCR = False
-DL_CONVERTER_OCR_BITMAP_AREA_THRESHOLD = .25
-DL_CONVERTER_OCR_ENABLED = True
-DL_CONVERTER_DO_TABLE_STRUCTURE = True
-DL_CONVERTER_DO_CELL_MATCHING = True
-DL_CONVERTER_TABLE_FORMER_MODE = TableFormerMode.ACCURATE
+# DL Converter config
+OCR_CONFIDENCE_THRESHOLD = 0.1
+OCR_BITMAP_AREA_THRESHOLD = 0.1
+IMAGES_SCALE = 1.0
+DL_GENERATE_IMAGES = True

@@ -41,6 +41,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV HF_HOME=/src/.cache/huggingface
 ENV DOCLING_MODELS=${HF_HOME}
+ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
 
 WORKDIR /src
 ENV HOME=/src
@@ -65,8 +66,9 @@ COPY --from=builder --chown=app:app /src/.venv .venv
 ENV PATH="/src/.venv/bin:$PATH"
 
 # create a cache directory for docling models
-RUN mkdir -p ${DOCLING_MODELS} && \
-    chown -R app:app ${DOCLING_MODELS}
+RUN mkdir -p ${HF_HOME} && \
+    chown -R app:app ${HF_HOME} && \
+    chmod -R 755 ${TESSDATA_PREFIX}
 
 # Copy the application code
 COPY --chown=app:app app/ ./app
@@ -75,8 +77,11 @@ COPY --chown=app:app app/ ./app
 USER app:app
 
 # Download docling models
-RUN docling-tools models download layout --force --output-dir=${DOCLING_MODELS} && \
-    docling-tools models download tableformer --force --output-dir=${DOCLING_MODELS}
+RUN docling-tools models download layout --force --output-dir=${HF_HOME} && \
+    docling-tools models download tableformer --force --output-dir=${HF_HOME} && \
+    docling-tools models download picture_classifier --force --output-dir=${HF_HOME} && \
+    docling-tools models download smolvlm --force --output-dir=${HF_HOME} && \
+    docling-tools models download easyocr --force --output-dir=${HF_HOME}
 
 EXPOSE $PORT
 CMD ["sh", "-c", "uvicorn app.api:api --host 0.0.0.0 --port $PORT --workers 1 --log-level info --timeout-keep-alive 0"]

@@ -5,38 +5,46 @@
 # restriction, subject to the conditions in the full MIT License.
 # The Software is provided "as is", without warranty of any kind.
 
+from enum import Enum
+
 from docling_core.types import doc as docling_types
 from pydantic import BaseModel, Field
 
 
 class Page(BaseModel):
+    class Slice(BaseModel):
+        """Represents a slice of content extracted from a document."""
+
+        class Position(BaseModel):
+            """Represents the position of a slice in a document."""
+            page_no: int = Field(..., description="The page number of the slice")
+            top: float = Field(..., description="The top position of the slice")
+            right: float = Field(..., description="The right position of the slice")
+            bottom: float = Field(..., description="The bottom position of the slice")
+            left: float = Field(..., description="The left position of the slice")
+            coord_origin: docling_types.CoordOrigin = Field(..., description="The coordinate origin of the slice")
+
+        class ContentMimeType(str, Enum):
+            TEXT = "text/plain"
+            JSON = "text/json"
+
+        level: int = Field(..., description="The level of the slice in the document hierarchy")
+        ref: str = Field(..., description="The reference ID of the slice")
+        sequence: int = Field(..., description="The sequence number of the slice in the document")
+        parent_ref: str = Field(..., description="The reference ID of the parent slice")
+        label: docling_types.DocItemLabel = Field(..., description="The label of the slice")
+        content: str | list | None = Field(..., description="The content of the slice")
+        content_mime_type: ContentMimeType | None = Field(..., description="The MIME type of the content")
+        png_image: str | None = Field(...,
+                                      description="Base64 encoded PNG image associated with the slice (if applicable)")
+        positions: list[Position] = Field(default_factory=list,
+                                          description="The positions of the slice in the document")
+
     """Represents a page in a document."""
     page_no: int = Field(..., description="The page number of the document")
     width: float = Field(..., description="The width of the page")
     height: float = Field(..., description="The height of the page")
-
-
-class Slice(BaseModel):
-    """Represents a slice of content extracted from a document."""
-
-    class Position(BaseModel):
-        """Represents the position of a slice in a document."""
-        page_no: int = Field(..., description="The page number of the slice")
-        top: float = Field(..., description="The top position of the slice")
-        right: float = Field(..., description="The right position of the slice")
-        bottom: float = Field(..., description="The bottom position of the slice")
-        left: float = Field(..., description="The left position of the slice")
-        coord_origin: docling_types.CoordOrigin = Field(..., description="The coordinate origin of the slice")
-
-    level: int = Field(..., description="The level of the slice in the document hierarchy")
-    ref: str = Field(..., description="The reference ID of the slice")
-    sequence: int = Field(..., description="The sequence number of the slice in the document")
-    parent_ref: str = Field(..., description="The reference ID of the parent slice")
-    label: docling_types.DocItemLabel = Field(..., description="The label of the slice")
-    content: str = Field(..., description="The content of the slice")
-    content_mime_type: str = Field(..., description="The MIME type of the content")
-    table_data: list | None = Field(..., description="The table data of the slice (if applicable)")
-    positions: list[Position] = Field(default_factory=list, description="The positions of the slice in the document")
+    slices: list[Slice] = Field(default_factory=list, description="The slices on the page")
 
 
 class HealthResponse(BaseModel):
@@ -50,7 +58,9 @@ class HealthResponse(BaseModel):
 class ProcessResponse(BaseModel):
     """Response model for the document processing endpoint."""
     document: str = Field(..., description="The document name")
-    size: int = Field(..., description="The size of the document in bytes")
     content_type: str = Field(..., description="The MIME type of the document")
+    size: int = Field(..., description="The size of the document in bytes")
+    total_pages: int = Field(..., description="The total number of pages in the document")
+    first_page: int = Field(..., description="The first page number of the document")
+    last_page: int = Field(..., description="The last page number of the document")
     pages: list[Page] = Field(..., description="The pages of the document")
-    slices: list[Slice] = Field(..., description="The slices extracted from the document")

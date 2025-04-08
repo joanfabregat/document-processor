@@ -1,6 +1,6 @@
 /.github
 /.git
 __pycache__/
-/.cache
 /.idea
 /.venv
+/.env.local

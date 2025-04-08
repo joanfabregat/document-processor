@@ -21,6 +21,9 @@ dependencies = [
     "uvicorn>=0.34.0",
     "torch>=2.6.0",
     "torchvision>=0.21.0",
+    "tesserocr>=2.8.0",
+    "python-dotenv>=1.1.0",
+    "pymupdf>=1.25.5",
 ]
 
 # https://docs.astral.sh/uv/guides/integration/pytorch/#using-a-pytorch-index
@@ -31,6 +34,7 @@ torch = [
 torchvision = [
     { index = "pytorch-cpu" },
 ]
+docling = { git = "https://github.com/joanfabregat/docling.git", rev = "fix-1333" }
 
 [[tool.uv.index]]
 name = "pytorch-cpu"

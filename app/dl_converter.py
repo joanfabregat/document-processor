@@ -5,46 +5,65 @@
 # restriction, subject to the conditions in the full MIT License.
 # The Software is provided "as is", without warranty of any kind.
 
-from threading import Lock
-
-from app import logger, config
 from docling.datamodel.pipeline_options import (
     PdfPipelineOptions,
     AcceleratorOptions,
-    TesseractCliOcrOptions,
+    EasyOcrOptions,
     TableStructureOptions,
+    TableFormerMode,
+    AcceleratorDevice
 )
 from docling.document_converter import DocumentConverter, InputFormat, PdfFormatOption
 
-_lock = Lock()
+from app import logger, config
 
-with _lock:
-    logger.info("Loading Docling document converter...")
 
-    # PDF pipeline options
-    pipeline_options = PdfPipelineOptions(
-        accelerator_options=AcceleratorOptions(
-            num_threads=config.DL_CONVERTER_THREADS,
-            device=config.DL_CONVERTER_ACCELERATOR
-        ),
-        do_ocr=config.DL_CONVERTER_OCR_ENABLED,
-        ocr_options=TesseractCliOcrOptions(
-            lang=["auto"],  # https://docling-project.github.io/docling/examples/tesseract_lang_detection/
-            force_full_page_ocr=config.DL_CONVERTER_FORCE_FULL_PAGE_OCR,
-            bitmap_area_threshold=config.DL_CONVERTER_OCR_BITMAP_AREA_THRESHOLD
-        ),
-        do_table_structure=config.DL_CONVERTER_DO_TABLE_STRUCTURE,
-        images_scale=config.DL_CONVERTER_IMAGE_SCALE,
-        table_structure_options=TableStructureOptions(
-            do_cell_matching=config.DL_CONVERTER_DO_CELL_MATCHING,
-            mode=config.DL_CONVERTER_TABLE_FORMER_MODE,
-        )
-    )
+def get_document_converter(full_ocr: bool = False) -> DocumentConverter:
+    """
+    Get the document converter with the specified options in a thread-safe manner.
 
-    # https://docling-project.github.io/docling/examples/run_with_accelerator/
+    https://docling-project.github.io/docling/examples/run_with_accelerator/
+
+    Args:
+        full_ocr (bool): Whether to use full OCR or not.
+
+    Returns:
+        DocumentConverter: The document converter.
+    """
+    logger.info(f"Loading Docling document converter with {'full OCR' if full_ocr else 'fast OCR'}...")
     dl_converter = DocumentConverter(
         format_options={
-            InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options)
+            InputFormat.PDF: PdfFormatOption(
+                pipeline_options=PdfPipelineOptions(
+                    accelerator_options=AcceleratorOptions(
+                        num_threads=config.THREADS,
+                        device=AcceleratorDevice.AUTO
+                    ),
+                    do_ocr=True,
+                    # ocr_options=TesseractOcrOptions(
+                    #     # https://docling-project.github.io/docling/examples/tesseract_lang_detection/
+                    #     # lang=["auto"],
+                    #     lang=["fra", "eng", "deu", "spa"],
+                    #     force_full_page_ocr=full_ocr,
+                    #     bitmap_area_threshold=.25
+                    # ),
+                    ocr_options=EasyOcrOptions(
+                        force_full_page_ocr=full_ocr,
+                        confidence_threshold=config.OCR_CONFIDENCE_THRESHOLD,
+                        bitmap_area_threshold=config.OCR_BITMAP_AREA_THRESHOLD
+                    ),
+                    images_scale=config.IMAGES_SCALE,
+                    generate_page_images=full_ocr or config.DL_GENERATE_IMAGES,
+                    generate_picture_images=config.DL_GENERATE_IMAGES,
+                    generate_table_images=config.DL_GENERATE_IMAGES,
+                    do_table_structure=True,
+                    table_structure_options=TableStructureOptions(
+                        do_cell_matching=True,
+                        mode=TableFormerMode.ACCURATE,
+                    )
+                )
+            )
         }
     )
-    logger.info("Docling document converter loaded successfully.")
+    logger.debug("Docling document converter loaded successfully.")
+    return dl_converter
