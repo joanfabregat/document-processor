@@ -24,7 +24,8 @@ start_dt = datetime.datetime.now()
 ##
 logger.info("Starting FastAPI app...")
 api = FastAPI(
-    title="Sophos inferencing API",
+    title="Document Processor API",
+    description="An API to extract slices from PDF documents.",
     version=config.VERSION,
     debug=config.ENV == "development",
 )
