@@ -211,19 +211,39 @@ def _convert_node_item_to_slice(
     if not isinstance(item, (TextItem, TableItem, PictureItem)):
         return None
 
-    # Extract the content and mime type of the item
-    content_mime_type, content = _extract_node_item_content(
-        document=document,
-        item=item,
-    )
-
-    # Extract image of the item if applicable
     png_image = None
-    if extract_images and isinstance(item, (TableItem, PictureItem)):
-        png_image = _extract_node_item_png_image(document, item)
+    caption_text = None
+    table_data = None
+    markdown_content = None
+    text_content = None
+    has_content = False
+
+    # Images & captions (pictures and tables)
+    if isinstance(item, PictureItem):
+        if extract_images:
+            png_image = _extract_item_png_image(document, item)
+            if png_image:
+                has_content = True
+        caption_text = _extract_item_caption_text(document, item)
+
+    # Tables
+    if isinstance(item, TableItem):
+        if extract_images:
+            png_image = _extract_item_png_image(document, item)
+        caption_text = _extract_item_caption_text(document, item)
+        markdown_content = _export_to_markdown(document, item)
+        table_data = _extract_item_table_data(item)
+        if table_data or markdown_content:
+            has_content = True
+
+    # Text content
+    if isinstance(item, TextItem):
+        text_content = item.text
+        if text_content:
+            has_content = True
 
     # Check if the content is valid
-    if not content and not png_image:
+    if not has_content:
         return None
 
     # Create slices
@@ -233,8 +253,10 @@ def _convert_node_item_to_slice(
         sequence=sequence,
         parent_ref=item.parent.cref if item.parent else None,
         label=item.label,
-        content=content,
-        content_mime_type=content_mime_type,
+        text_content=text_content,
+        markdown_content=markdown_content,
+        caption_text=caption_text,
+        table_data=table_data,
         png_image=png_image,
         positions=[
             models.Page.Slice.Position(
@@ -249,7 +271,41 @@ def _convert_node_item_to_slice(
     )
 
 
-def _extract_node_item_png_image(document: DoclingDocument, item: PictureItem | TableItem) -> str | None:
+def _extract_item_table_data(item: TableItem) -> list[dict] | None:
+    """
+    Extract table data from the item.
+
+    Args:
+        item (TableItem): The item to extract table data from.
+
+    Returns:
+        list[dict] | None: The extracted table data or None if not available.
+    """
+    df = item.export_to_dataframe()
+    columns = df.columns.tolist()
+    if len(columns) > 0:
+        values = df.values.tolist()
+        if len(values) > 0:
+            return [columns] + values
+
+
+def _extract_item_caption_text(document: DoclingDocument, item: TableItem | PictureItem) -> str | None:
+    """
+    Get the caption text of the item.
+
+    Args:
+        document (DoclingDocument): The document to extract the caption text from.
+        item (TableItem|PictureItem): The item to get the caption text from.
+
+    Returns:
+        str | None: The caption text of the item or None if not available.
+    """
+    text = item.caption_text(document)
+    if text:
+        return text
+
+
+def _extract_item_png_image(document: DoclingDocument, item: PictureItem | TableItem) -> str | None:
     """
     Get the PNG image of the item.
 
@@ -268,35 +324,17 @@ def _extract_node_item_png_image(document: DoclingDocument, item: PictureItem | 
         return base64.b64encode(byte_arr.getvalue()).decode('ascii')
 
 
-def _extract_node_item_content(
-        document: DoclingDocument,
-        item: NodeItem,
-) -> tuple[models.Page.Slice.ContentMimeType | None, str | list | None]:
+def _export_to_markdown(document: DoclingDocument, item: TableItem) -> str | None:
     """
-    Get the content and MIME type of the item.
+    Export the item to Markdown format.
 
     Args:
-        document (DoclingDocument): The document to extract the content from.
-        item (NodeItem): The item to get the content from.
+        document (DoclingDocument): The document to export from.
+        item (TableItem): The item to export.
 
     Returns:
-        A tuple containing the MIME type and content of the item.
+        str | None: The exported Markdown content or None if not available.
     """
-    # Extract the table data of the table item
-    if isinstance(item, TableItem):
-        df = item.export_to_dataframe()
-        table_data = [df.columns.tolist()] + df.values.tolist()
-        if len(table_data) > 0 and len(table_data[0]) > 0:
-            return models.Page.Slice.ContentMimeType.JSON, table_data
-
-    # Extract the caption text of the floating item
-    elif isinstance(item, PictureItem):
-        slice_caption = item.caption_text(document)
-        if slice_caption:
-            return models.Page.Slice.ContentMimeType.TEXT, slice_caption
-
-    # Extract the content and mime type for  text items
-    elif isinstance(item, TextItem):
-        return models.Page.Slice.ContentMimeType.TEXT, item.text
-
-    return None, None
+    markdown = item.export_to_markdown(document)
+    if markdown:
+        return markdown

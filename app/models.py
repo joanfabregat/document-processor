@@ -24,19 +24,17 @@ class Page(BaseModel):
             left: float = Field(..., description="The left position of the slice")
             coord_origin: docling_types.CoordOrigin = Field(..., description="The coordinate origin of the slice")
 
-        class ContentMimeType(str, Enum):
-            TEXT = "text/plain"
-            JSON = "text/json"
-
         level: int = Field(..., description="The level of the slice in the document hierarchy")
         ref: str = Field(..., description="The reference ID of the slice")
         sequence: int = Field(..., description="The sequence number of the slice in the document")
         parent_ref: str = Field(..., description="The reference ID of the parent slice")
         label: docling_types.DocItemLabel = Field(..., description="The label of the slice")
-        content: str | list | None = Field(..., description="The content of the slice")
-        content_mime_type: ContentMimeType | None = Field(..., description="The MIME type of the content")
-        png_image: str | None = Field(...,
-                                      description="Base64 encoded PNG image associated with the slice (if applicable)")
+        text_content: str | None = Field(..., description="The text content of the slice")
+        caption_text: str | None = Field(..., description="The caption of the slice (for tables and pictures)")
+        markdown_content: str | None = Field(..., description="The Markdown content of the slice (for tables)")
+        table_data: list[list] | None = Field(..., description="The table data associated with the slice (for tables)")
+        png_image: str | None = Field(..., description="Base64 encoded PNG image associated with the slice "
+                                                       "(for tables and pictures)")
         positions: list[Position] = Field(default_factory=list,
                                           description="The positions of the slice in the document")
 
