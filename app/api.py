@@ -52,7 +52,7 @@ async def process_document(
         file: UploadFile = File(..., description="The PDF document to process"),
         include_images: bool = False,
         first_page: int = 1,
-        last_page: int = sys.maxsize,
+        last_page: int = None,
 ):
     """
     Extract slices from a PDF document.
@@ -73,6 +73,8 @@ async def process_document(
             detail="Invalid file type. Only PDF files are supported.",
         )
 
+
+
     with tempfile.NamedTemporaryFile(delete=False, suffix="pdf") as temp_file:
         # noinspection PyTypeChecker
         shutil.copyfileobj(file.file, temp_file)
@@ -81,6 +83,8 @@ async def process_document(
     with pymupdf.open(temp_file_path) as pdf:
         pages_count = len(pdf)
 
+    if last_page is None:
+        last_page = sys.maxsize
     page_range = (max(1, first_page), min(pages_count, last_page))
 
     try:
