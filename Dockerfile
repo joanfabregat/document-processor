@@ -79,8 +79,6 @@ USER app:app
 # Download docling models
 RUN docling-tools models download layout --force --output-dir=${HF_HOME} && \
     docling-tools models download tableformer --force --output-dir=${HF_HOME} && \
-    docling-tools models download picture_classifier --force --output-dir=${HF_HOME} && \
-    docling-tools models download smolvlm --force --output-dir=${HF_HOME} && \
     docling-tools models download easyocr --force --output-dir=${HF_HOME}
 
 EXPOSE $PORT
