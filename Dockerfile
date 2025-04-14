@@ -13,6 +13,12 @@ FROM python:${PYTHON_VERSION}-slim AS builder
 
 WORKDIR /src
 
+# Install Git
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends git && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 # Install uv and its dependencies
 COPY --from=ghcr.io/astral-sh/uv:0.6.8 /uv /uvx /bin/
 RUN chmod +x /bin/uv /bin/uvx && \
@@ -41,20 +47,9 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV HF_HOME=/src/.cache/huggingface
 ENV DOCLING_MODELS=${HF_HOME}
-ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
 
 WORKDIR /src
 ENV HOME=/src
-
-# Config for Tesseract
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    tesseract-ocr \
-    tesseract-ocr-fra \
-    tesseract-ocr-eng \
-    tesseract-ocr-deu \
-    tesseract-ocr-spa \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user to run the application
 RUN addgroup --system app && \
@@ -62,13 +57,8 @@ RUN addgroup --system app && \
     chown app:app /src
 
 # Copy the virtual environment
-COPY --from=builder --chown=app:app /src/.venv .venv
+COPY --from=builder --chown=app:app /src/.venv /src/.venv
 ENV PATH="/src/.venv/bin:$PATH"
-
-# create a cache directory for docling models
-RUN mkdir -p ${HF_HOME} && \
-    chown -R app:app ${HF_HOME} && \
-    chmod -R 755 ${TESSDATA_PREFIX}
 
 # Copy the application code
 COPY --chown=app:app app/ ./app
@@ -77,7 +67,8 @@ COPY --chown=app:app app/ ./app
 USER app:app
 
 # Download docling models
-RUN docling-tools models download layout --force --output-dir=${HF_HOME} && \
+RUN mkdir -p ${HF_HOME} && \
+    docling-tools models download layout --force --output-dir=${HF_HOME} && \
     docling-tools models download tableformer --force --output-dir=${HF_HOME} && \
     docling-tools models download easyocr --force --output-dir=${HF_HOME}
 
