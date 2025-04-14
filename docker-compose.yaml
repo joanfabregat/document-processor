@@ -15,8 +15,14 @@ services:
       dockerfile: Dockerfile
       platforms:
         - linux/amd64
-#        - linux/arm64
+      #        - linux/arm64
       args:
-        - PORT=80
+        VERSION: v0.1.0
+        BUILD_ID: docker-desktop
+        COMMIT_SHA: docker-desktop
     ports:
       - "8000:80"
+    environment:
+      ENV: production
+      PORT: 80
+      THREADS: 4
