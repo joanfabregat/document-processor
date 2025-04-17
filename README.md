@@ -13,7 +13,7 @@ Document Processor is a FastAPI-based service that processes documents and extra
 - Precise positioning information for each content slice
 - Optional image extraction
 - Page range selection for processing
-- Table data extraction in multiple formats (Markdown and structured data)
+- Table data extraction 
 - Support for captions in tables and images
 
 ## API Endpoints
