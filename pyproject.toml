@@ -14,14 +14,13 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
-    "docling>=2.28.4",
+    "docling>=2.30.0",
     "fastapi>=0.115.11",
     "pydantic>=2.11.1",
     "python-multipart>=0.0.20",
     "uvicorn>=0.34.0",
     "torch>=2.6.0",
     "torchvision>=0.21.0",
-    "tesserocr>=2.8.0",
     "python-dotenv>=1.1.0",
     "pymupdf>=1.25.5",
 ]
@@ -34,7 +33,6 @@ torch = [
 torchvision = [
     { index = "pytorch-cpu" },
 ]
-docling = { git = "https://github.com/joanfabregat/docling.git", rev = "fix-1333" }
 
 [[tool.uv.index]]
 name = "pytorch-cpu"
