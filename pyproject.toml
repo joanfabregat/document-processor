@@ -33,7 +33,6 @@ dependencies = [
 #torchvision = [
 #    { index = "pytorch-cpu" },
 #]
-#docling = { git = "https://github.com/joanfabregat/docling.git", rev = "fix-1333" }
 #
 #[[tool.uv.index]]
 #name = "pytorch-cpu"
