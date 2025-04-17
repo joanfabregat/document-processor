@@ -16,7 +16,8 @@ from app import config, logger
 logger.info("Downloading EasyOCR models...")
 reader = easyocr.Reader(
     lang_list=config.OCR_LANGUAGES,
-    download_enabled=True
+    download_enabled=True,
+    verbose=False
 )
 
 ##
