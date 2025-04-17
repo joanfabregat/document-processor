@@ -43,10 +43,12 @@ ENV VERSION=${VERSION}
 ENV BUILD_ID=${BUILD_ID}
 ENV COMMIT_SHA=${COMMIT_SHA}
 
+ENV PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True"
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV HF_HOME=/src/.cache/huggingface
 ENV DOCLING_MODELS=${HF_HOME}
+ENV EASYOCR_MODULE_PATH=/src/.cache/
 
 WORKDIR /src
 ENV HOME=/src
@@ -66,11 +68,10 @@ COPY --chown=app:app app/ ./app
 # Ensure a non-root user
 USER app:app
 
-# Download docling models
+# Download Docling and EasyOCR models
 RUN mkdir -p ${HF_HOME} && \
-    docling-tools models download layout --force --output-dir=${HF_HOME} && \
-    docling-tools models download tableformer --force --output-dir=${HF_HOME} && \
-    docling-tools models download easyocr --force --output-dir=${HF_HOME}
+    mkdir -p ${EASYOCR_MODULE_PATH} && \
+    python -m app.download_models
 
 EXPOSE $PORT
 CMD ["sh", "-c", "uvicorn app.api:api --host 0.0.0.0 --port $PORT --workers 1 --log-level info --timeout-keep-alive 0"]
