@@ -9,15 +9,19 @@ ARG PYTHON_VERSION=3.12
 
 
 # --- Builder Image ---
-FROM python:${PYTHON_VERSION}-slim AS builder
+FROM python:12.8.1-cudnn-runtime-ubuntu22.04 AS base
 
 WORKDIR /src
 
 # Install Git
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends git && \
-    apt-get clean && \
+RUN apt-get update &&  \
+    apt-get install -y --no-install-recommends python3 python3-venv python3-dev python3-pip cron git curl && \
     rm -rf /var/lib/apt/lists/*
+
+# --- Builder Image ---
+FROM base AS build
+
+WORKDIR /src
 
 # Install uv and its dependencies
 COPY --from=ghcr.io/astral-sh/uv:0.6.8 /uv /uvx /bin/
@@ -31,7 +35,7 @@ RUN uv sync --frozen
 
 
 # --- Final Image ---
-FROM python:${PYTHON_VERSION}-slim AS final
+FROM base AS final
 
 ARG PORT=8000
 ARG VERSION
