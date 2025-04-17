@@ -19,7 +19,7 @@ RUN apt-get update &&  \
     rm -rf /var/lib/apt/lists/*
 
 # --- Builder Image ---
-FROM base AS build
+FROM base AS builder
 
 WORKDIR /src
 
