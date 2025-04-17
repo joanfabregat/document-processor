@@ -307,7 +307,6 @@ def _extract_item_table_data(item: TableItem, cleanup: bool) -> list[list[str | 
                 if isinstance(col, str):
                     clean_col = _clean_pdf_glyphs(col)
                     if clean_col != col:
-                        logger.info(f"Cleaning up table cell '{col}' from '{_clean_pdf_glyphs(col)}'")
                         table_data[i][j] = clean_col
     return table_data
 
