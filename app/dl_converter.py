@@ -49,6 +49,7 @@ def get_document_converter(full_ocr: bool = False) -> DocumentConverter:
                     # ),
                     ocr_options=EasyOcrOptions(
                         force_full_page_ocr=full_ocr,
+                        lang=["fr", "de", "es", "en"],
                         confidence_threshold=config.OCR_CONFIDENCE_THRESHOLD,
                         bitmap_area_threshold=config.OCR_BITMAP_AREA_THRESHOLD
                     ),
