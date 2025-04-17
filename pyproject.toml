@@ -27,16 +27,16 @@ dependencies = [
 ]
 
 # https://docs.astral.sh/uv/guides/integration/pytorch/#using-a-pytorch-index
-[tool.uv.sources]
-torch = [
-    { index = "pytorch-cpu" },
-]
-torchvision = [
-    { index = "pytorch-cpu" },
-]
-docling = { git = "https://github.com/joanfabregat/docling.git", rev = "fix-1333" }
-
-[[tool.uv.index]]
-name = "pytorch-cpu"
-url = "https://download.pytorch.org/whl/cpu"
-explicit = true
+#[tool.uv.sources]
+#torch = [
+#    { index = "pytorch-cpu" },
+#]
+#torchvision = [
+#    { index = "pytorch-cpu" },
+#]
+#docling = { git = "https://github.com/joanfabregat/docling.git", rev = "fix-1333" }
+#
+#[[tool.uv.index]]
+#name = "pytorch-cpu"
+#url = "https://download.pytorch.org/whl/cpu"
+#explicit = true
