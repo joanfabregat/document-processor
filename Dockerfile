@@ -5,11 +5,9 @@
 # restriction, subject to the conditions in the full MIT License.
 # The Software is provided "as is", without warranty of any kind.
 
-ARG PYTHON_VERSION=3.12
-
 
 # --- Builder Image ---
-FROM python:12.8.1-cudnn-runtime-ubuntu22.04 AS base
+FROM nvidia/cuda:12.8.1-cudnn-runtime-ubuntu22.04 AS base
 
 WORKDIR /src
 
