@@ -26,3 +26,4 @@ services:
       ENV: production
       PORT: 80
       THREADS: 4
+      NNPACK_DISABLE: 1
