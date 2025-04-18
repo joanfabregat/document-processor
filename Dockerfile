@@ -6,25 +6,47 @@
 # The Software is provided "as is", without warranty of any kind.
 
 
-# --- Builder Image ---
-FROM nvidia/cuda:12.8.1-cudnn-runtime-ubuntu22.04 AS base
+##
+# Base Image
+##
+FROM nvidia/cuda:12.8.1-runtime-ubuntu24.04 AS base
+#FROM nvidia/cuda:12.8.1-devel-ubuntu24.04 AS base
 
 WORKDIR /src
+ENV HOME=/src
 
-# Install Git
-RUN apt-get update &&  \
-    apt-get install -y --no-install-recommends python3 python3-venv python3-dev python3-pip cron git curl && \
-    rm -rf /var/lib/apt/lists/*
+# Set environment variables to avoid interactive prompts during installation
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Europe/Paris
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True"
 
-# --- Builder Image ---
+
+# Install Python and necessary dependencies
+RUN apt-get update  \
+    && apt-get install -y \
+        python3.12 \
+        python3.12-dev \
+        #curl \
+        git \
+        #build-essential \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a symbolic link for python3 to python3.10
+RUN ln -sf /usr/bin/python3.12 /usr/bin/python3 && \
+    ln -sf /usr/bin/python3 /usr/bin/python
+
+##
+# Builder Image
+##
 FROM base AS builder
 
-WORKDIR /src
-
 # Install uv and its dependencies
-COPY --from=ghcr.io/astral-sh/uv:0.6.8 /uv /uvx /bin/
-RUN chmod +x /bin/uv /bin/uvx && \
-    uv venv .venv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+RUN chmod +x /bin/uv /bin/uvx
+RUN uv venv .venv
 ENV PATH="/src/.venv/bin:$PATH"
 
 # Copy dependency specification and install production dependencies
@@ -32,7 +54,9 @@ COPY uv.lock pyproject.toml ./
 RUN uv sync --frozen
 
 
-# --- Final Image ---
+##
+# Final Image
+##
 FROM base AS final
 
 ARG PORT=8000
@@ -45,15 +69,9 @@ ENV VERSION=${VERSION}
 ENV BUILD_ID=${BUILD_ID}
 ENV COMMIT_SHA=${COMMIT_SHA}
 
-ENV PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True"
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
 ENV HF_HOME=/src/.cache/huggingface
 ENV DOCLING_MODELS=${HF_HOME}
-ENV EASYOCR_MODULE_PATH=/src/.cache/
-
-WORKDIR /src
-ENV HOME=/src
+ENV EASYOCR_MODULE_PATH=/src/.cache/easyocr
 
 # Create a non-root user to run the application
 RUN addgroup --system app && \
@@ -65,7 +83,7 @@ COPY --from=builder --chown=app:app /src/.venv /src/.venv
 ENV PATH="/src/.venv/bin:$PATH"
 
 # Copy the application code
-COPY --chown=app:app app/ ./app
+COPY --chown=app:app app/ /src/app
 
 # Ensure a non-root user
 USER app:app
