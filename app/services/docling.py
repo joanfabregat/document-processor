@@ -23,6 +23,7 @@ EASY_OCR_LANGUAGES = ["fr", "de", "es", "en"]
 
 
 def get_dl_converter(
+        *,
         full_ocr: bool = False,
         ocr_confidence_threshold: float = 0.01,
         ocr_bitmap_area_threshold: float = 0.1,
