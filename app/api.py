@@ -6,8 +6,11 @@
 # The Software is provided "as is", without warranty of any kind.
 
 import datetime
+import shutil
+import tempfile
 
 from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
 from app import models, logger, config
@@ -24,6 +27,15 @@ api = FastAPI(
     description="An API to extract slices from PDF documents.",
     version=config.VERSION,
     debug=config.ENV == "development",
+)
+
+# noinspection PyTypeChecker
+api.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
 )
 
 
@@ -72,30 +84,29 @@ async def process_document(
             detail="Invalid file type. Only PDF files are supported.",
         )
 
-    pdf_bytes = await file.read()
-    if not pdf_bytes:
-        raise HTTPException(
-            status_code=400,
-            detail="Empty file. Please upload a valid PDF document.",
-        )
+    with tempfile.NamedTemporaryFile() as temp_file:
+        logger.debug(f"Creating temp file: {temp_file.name}")
+        # noinspection PyTypeChecker
+        shutil.copyfileobj(file.file, temp_file)
 
-    try:
-        content_extractor = ContentExtractor(pdf_bytes=pdf_bytes, filename=file.filename)
+        try:
+            content_extractor = ContentExtractor(bytes_or_path=temp_file.name, filename=file.filename)
 
-        return models.ProcessResponse(
-            document=file.filename,
-            size=file.size,
-            content_type=file.content_type,
-            pages=content_extractor.extract_pages_model(
-                first_page=params.first_page,
-                last_page=params.last_page,
-                include_page_screenshot=params.include_page_screenshot,
-                include_slice_screenshot=params.include_slice_screenshot,
-                image_format=params.image_format,
-                image_quality=params.image_quality,
-            ),
-        )
-    except Exception as e:
-        logger.error(f"Error processing file: {str(e)}")
-        raise e
-        # raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}") from e
+            return models.ProcessResponse(
+                document=file.filename,
+                size=file.size,
+                content_type=file.content_type,
+                pages=content_extractor.extract_pages_model(
+                    first_page=params.first_page,
+                    last_page=params.last_page,
+                    include_page_screenshot=params.include_page_screenshot,
+                    include_slice_screenshot=params.include_slice_screenshot,
+                    image_format=params.image_format,
+                    image_quality=params.image_quality,
+                ),
+            )
+        except Exception as e:
+            logger.error(f"Error processing file: {str(e)}")
+            raise e
+            # raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}") from e
+    
