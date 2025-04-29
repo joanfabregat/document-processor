@@ -42,7 +42,7 @@ class ImageExtractor:
         """
         return self.pil_image.height
 
-    def get_data(self, image_format: str = "WEBP", image_quality: int = 80) -> bytes:
+    def get_data(self, image_format: models.ImageFormat = models.ImageFormat.WEBP, image_quality: int = 80) -> bytes:
         """
         Returns the image data in the specified format and quality.
 
@@ -57,12 +57,17 @@ class ImageExtractor:
         webp_bytes = BytesIO()
         self.pil_image.save(
             webp_bytes,
-            format=image_format,
+            format=image_format.value.upper(),
             quality=image_quality
         )
         return webp_bytes.getvalue()
 
-    def get_model(self, *, image_format: str = "WEBP", image_quality: int = 80) -> models.Image:
+    def get_model(
+            self,
+            *,
+            image_format: models.ImageFormat = models.ImageFormat.WEBP,
+            image_quality: int = 80
+    ) -> models.Image:
         """
         Returns the model of the image.
 
@@ -77,5 +82,5 @@ class ImageExtractor:
             data=encode_to_base64(self.get_data(image_format, image_quality)),
             width=self.get_width(),
             height=self.get_height(),
-            content_type=f"image/{image_format.lower()}",
+            content_type=f"image/{image_format.value}",
         )

@@ -162,7 +162,7 @@ class SliceExtractor:
             *,
             slice_no: int,
             include_slice_screenshot: bool,
-            image_format: str,
+            image_format: models.ImageFormat,
             image_quality: int
     ) -> models.Slice:
         """

@@ -81,7 +81,7 @@ class PageExtractor:
             slice_no: int,
             include_page_screenshot: bool,
             include_slice_screenshot: bool,
-            image_format: str,
+            image_format: models.ImageFormat,
             image_quality: int
     ) -> models.Page:
         """
@@ -91,8 +91,8 @@ class PageExtractor:
             slice_no: The slice number to start from.
             include_page_screenshot: Whether to include the page screenshot.
             include_slice_screenshot: Whether to include the slice screenshot.
-            image_format: The format of the image (default: WEBP).
-            image_quality: The quality of the image (1-100, default: 80).
+            image_format: The format of the image.
+            image_quality: The quality of the image.
 
         Returns:
             The model of the page as a DoclingDocument object.

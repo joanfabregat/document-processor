@@ -5,9 +5,17 @@
 # restriction, subject to the conditions in the full MIT License.
 # The Software is provided "as is", without warranty of any kind.
 
+import enum
+
 from docling_core.types import doc as docling_types
 from pydantic import BaseModel, Field
 
+
+
+class ImageFormat(str, enum.Enum):
+    JPEG = "jpeg"
+    PNG = "png"
+    WEBP = "webp"
 
 class Image(BaseModel):
     data: str = Field(..., description="Base64 encoded image data")
