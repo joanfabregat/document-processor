@@ -66,6 +66,7 @@ class ProcessRequest(BaseModel):
     include_slice_screenshot: bool = Field(default=False, description="Whether to include a screenshot of the slice")
     image_format: str = Field(default="WEBP", description="The image format for the screenshots")
     image_quality: int = Field(default=80, description="The quality of the image (0-100)")
+    image_scale: float = Field(default=2.0, description="The scale factor for the images")
 
 
 class ProcessResponse(BaseModel):

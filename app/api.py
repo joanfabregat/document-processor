@@ -99,7 +99,11 @@ async def process_document(
 
     try:
         # Extract the specified range of pages from the PDF document
-        content_extractor = ContentExtractor(bytes_or_path=bytes_or_path, filename=file.filename)
+        content_extractor = ContentExtractor(
+            bytes_or_path=bytes_or_path,
+            filename=file.filename,
+            images_scale=params.image_scale
+        )
         pages = content_extractor.extract_pages_model(
             first_page=params.first_page,
             last_page=params.last_page,

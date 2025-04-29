@@ -7,7 +7,6 @@
 
 from io import BytesIO
 from pathlib import Path
-from threading import Lock
 from typing import Generator
 
 from docling.datamodel.base_models import DocumentStream
@@ -24,12 +23,7 @@ class ContentExtractor:
     Class to extract content from a PDF document.
     """
 
-    _lock = Lock()
-    with _lock:
-        fast_converter = get_dl_converter(full_ocr=False)
-        full_ocr_converter = get_dl_converter(full_ocr=True)
-
-    def __init__(self, bytes_or_path: bytes | str | Path, filename: str = "file.pdf"):
+    def __init__(self, bytes_or_path: bytes | str | Path, filename: str = "file.pdf", images_scale: float = 3.0):
         """
         Initialize the PDF content extractor.
 
@@ -40,6 +34,8 @@ class ContentExtractor:
         self.bytes_or_path = bytes_or_path
         self.filename = filename
         self._logger = logger.getChild(__name__)
+        self._fast_converter = get_dl_converter(full_ocr=False, images_scale=images_scale)
+        self._full_ocr_converter = get_dl_converter(full_ocr=True, images_scale=images_scale)
 
     def extract_pages(
             self,
@@ -104,7 +100,7 @@ class ContentExtractor:
         Returns:
             The converted Docling document or None if not available.
         """
-        converter = self.full_ocr_converter if use_full_ocr_converter else self.fast_converter
+        converter = self._full_ocr_converter if use_full_ocr_converter else self._fast_converter
         try:
             if isinstance(self.bytes_or_path, bytes):
                 # noinspection PyTypeChecker
