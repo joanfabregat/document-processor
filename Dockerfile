@@ -74,5 +74,6 @@ RUN mkdir -p ${HF_HOME} && \
     python -m app.download_models
 
 EXPOSE $PORT
-CMD ["sh", "-c", "uvicorn app.api:api --host 0.0.0.0 --port $PORT --workers 1 --log-level info --timeout-keep-alive 0 --http h2c"]
+#CMD ["sh", "-c", "uvicorn app.api:api --host 0.0.0.0 --port $PORT --workers 1 --log-level info --timeout-keep-alive 0 --http h2c"]
+CMD ["sh", "-c", "hypercorn app.api:api --bind 0.0.0.0:$PORT --workers 1 --log-level info"]
 
