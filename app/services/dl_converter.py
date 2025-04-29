@@ -5,6 +5,8 @@
 #  restriction, subject to the conditions in the full MIT License.
 #  The Software is provided "as is", without warranty of any kind.
 
+from functools import lru_cache
+
 from docling.datamodel.pipeline_options import (
     PdfPipelineOptions,
     AcceleratorOptions,
@@ -22,6 +24,7 @@ _logger = logger.getChild(__name__)
 EASY_OCR_LANGUAGES = ["fr", "de", "es", "en"]
 
 
+@lru_cache(maxsize=8)
 def get_dl_converter(
         *,
         full_ocr: bool = False,

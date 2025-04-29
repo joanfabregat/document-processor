@@ -9,7 +9,7 @@ import docling.utils.model_downloader
 import easyocr
 
 from app import logger
-from app.services.docling import EASY_OCR_LANGUAGES
+from app.services.dl_converter import EASY_OCR_LANGUAGES
 
 _logger = logger.getChild(__name__)
 

@@ -11,6 +11,10 @@ from docling_core.types import doc as docling_types
 from pydantic import BaseModel, Field
 
 
+class OcrPipeline(str, enum.Enum):
+    FAST = "fast"
+    FULL = "full"
+    HYBRID = "hybrid"
 
 class ImageFormat(str, enum.Enum):
     JPEG = "jpeg"
@@ -68,11 +72,12 @@ class HealthResponse(BaseModel):
 
 
 class ProcessRequest(BaseModel):
+    ocr_pipeline: OcrPipeline = Field(default=OcrPipeline.HYBRID, description="The OCR pipeline to use")
     first_page: int = Field(default=1, description="The first page number to process")
     last_page: int | None = Field(default=None, description="The last page number to process")
-    include_page_screenshot: bool = Field(default=False, description="Whether to include a screenshot of the page")
-    include_slice_screenshot: bool = Field(default=False, description="Whether to include a screenshot of the slice")
-    image_format: str = Field(default="WEBP", description="The image format for the screenshots")
+    include_page_screenshot: bool = Field(default=True, description="Whether to include a screenshot of the page")
+    include_slice_screenshot: bool = Field(default=True, description="Whether to include a screenshot of the slice")
+    image_format: ImageFormat = Field(default=ImageFormat.WEBP, description="The image format for the screenshots")
     image_quality: int = Field(default=80, description="The quality of the image (0-100)")
     image_scale: float = Field(default=2.0, description="The scale factor for the images")
 

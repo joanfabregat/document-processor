@@ -102,7 +102,8 @@ async def process_document(
         content_extractor = ContentExtractor(
             bytes_or_path=bytes_or_path,
             filename=file.filename,
-            images_scale=params.image_scale
+            images_scale=params.image_scale,
+
         )
         pages = content_extractor.extract_pages_model(
             first_page=params.first_page,
