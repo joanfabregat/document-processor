@@ -6,6 +6,7 @@
 #  The Software is provided "as is", without warranty of any kind.
 
 from io import BytesIO
+from pathlib import Path
 from threading import Lock
 from typing import Generator
 
@@ -28,15 +29,15 @@ class ContentExtractor:
         fast_converter = get_dl_converter(full_ocr=False)
         full_ocr_converter = get_dl_converter(full_ocr=True)
 
-    def __init__(self, pdf_bytes: bytes, filename: str = "file.pdf"):
+    def __init__(self, bytes_or_path: bytes | str | Path, filename: str = "file.pdf"):
         """
         Initialize the PDF content extractor.
 
         Args:
-            pdf_bytes: The PDF file as bytes.
+            bytes_or_path: The PDF file as bytes.
             filename: The name of the PDF file.
         """
-        self.pdf_bytes = pdf_bytes
+        self.bytes_or_path = bytes_or_path
         self.filename = filename
         self._logger = logger.getChild(__name__)
 
@@ -56,7 +57,7 @@ class ContentExtractor:
             A tuple containing the page number and the page with slices extracted from the document.
         """
         if not last_page:
-            last_page = count_pdf_pages(self.pdf_bytes)
+            last_page = count_pdf_pages(self.bytes_or_path)
 
         self._logger.debug(f"Processing page range %s to %s", first_page, last_page)
 
@@ -105,9 +106,14 @@ class ContentExtractor:
         """
         converter = self.full_ocr_converter if use_full_ocr_converter else self.fast_converter
         try:
-            # noinspection PyTypeChecker
+            if isinstance(self.bytes_or_path, bytes):
+                # noinspection PyTypeChecker
+                source = DocumentStream(name=self.filename, stream=BytesIO(self.bytes_or_path))
+            else:
+                source = self.bytes_or_path
+
             result = converter.convert(
-                DocumentStream(name=self.filename, stream=BytesIO(self.pdf_bytes)),
+                source=source,
                 page_range=(page_no, page_no),
                 raises_on_error=False,
             )

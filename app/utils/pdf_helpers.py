@@ -4,23 +4,29 @@
 #  Visit <https://www.codeinc.co> for more information
 
 import re
+from pathlib import Path
 
 import pymupdf
 
 glyph_pattern = re.compile(r'(?i)glyph<(?:c=\d+,font=/[A-Z0-9]+\+[A-Za-z0-9-]+|\d+)>')
 
 
-def count_pdf_pages(pdf_bytes: bytes) -> int:
+def count_pdf_pages(bytes_or_path: bytes | str | Path) -> int:
     """
     Count the number of pages in a PDF document.
 
     Args:
-        pdf_bytes: The content of the PDF document as bytes.
+        bytes_or_path: The content of the PDF document as bytes or the path to the PDF file.
 
     Returns:
         The number of pages in the PDF document.
     """
-    with pymupdf.open(stream=pdf_bytes) as pdf:
+    if isinstance(bytes_or_path, (str, Path)):
+        handler = pymupdf.open(filename=bytes_or_path)
+    else:
+        handler = pymupdf.open(stream=bytes_or_path)
+
+    with handler as pdf:
         return len(pdf)
 
 
