@@ -26,7 +26,7 @@ def get_dl_converter(
         full_ocr: bool = False,
         ocr_confidence_threshold: float = 0.01,
         ocr_bitmap_area_threshold: float = 0.1,
-        images_scale: float = 2.0,
+        images_scale: float = 3.0,
         dl_generate_images: bool = True,
 ) -> DocumentConverter:
     """
