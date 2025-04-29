@@ -8,14 +8,17 @@
 import docling.utils.model_downloader
 import easyocr
 
-from app import config, logger
+from app import logger
+from app.services.docling import EASY_OCR_LANGUAGES
+
+_logger = logger.getChild(__name__)
 
 ##
 # Download EasyOCR models
 ##
-logger.info("Downloading EasyOCR models...")
+_logger.info("Downloading EasyOCR models...")
 reader = easyocr.Reader(
-    lang_list=config.OCR_LANGUAGES,
+    lang_list=EASY_OCR_LANGUAGES,
     download_enabled=True,
     verbose=False
 )
@@ -23,7 +26,7 @@ reader = easyocr.Reader(
 ##
 # Download Docling models
 ##
-logger.info("Downloading Docling models...")
+_logger.info("Downloading Docling models...")
 docling.utils.model_downloader.download_models(
     with_layout=True,
     with_tableformer=True,

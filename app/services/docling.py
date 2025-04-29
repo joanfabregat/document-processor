@@ -1,9 +1,9 @@
-# Copyright (c) 2025 Joan Fabrégat <j@fabreg.at>
-# Permission is hereby granted, free of charge, to any person
-# obtaining a copy of this software and associated documentation
-# files (the "Software"), to deal in the Software without
-# restriction, subject to the conditions in the full MIT License.
-# The Software is provided "as is", without warranty of any kind.
+#  Copyright (c) 2025 Joan Fabrégat <j@fabreg.at>
+#  Permission is hereby granted, free of charge, to any person
+#  obtaining a copy of this software and associated documentation
+#  files (the "Software"), to deal in the Software without
+#  restriction, subject to the conditions in the full MIT License.
+#  The Software is provided "as is", without warranty of any kind.
 
 from docling.datamodel.pipeline_options import (
     PdfPipelineOptions,
@@ -17,8 +17,18 @@ from docling.document_converter import DocumentConverter, InputFormat, PdfFormat
 
 from app import logger, config
 
+_logger = logger.getChild(__name__)
 
-def get_document_converter(full_ocr: bool = False) -> DocumentConverter:
+EASY_OCR_LANGUAGES = ["fr", "de", "es", "en"]
+
+
+def get_dl_converter(
+        full_ocr: bool = False,
+        ocr_confidence_threshold: float = 0.01,
+        ocr_bitmap_area_threshold: float = 0.1,
+        images_scale: float = 2.0,
+        dl_generate_images: bool = True,
+) -> DocumentConverter:
     """
     Get the document converter with the specified options in a thread-safe manner.
 
@@ -26,11 +36,19 @@ def get_document_converter(full_ocr: bool = False) -> DocumentConverter:
 
     Args:
         full_ocr (bool): Whether to use full OCR or not.
+        ocr_confidence_threshold (float): The confidence threshold for OCR.
+        ocr_bitmap_area_threshold (float): The bitmap area threshold for OCR.
+        images_scale (float): The scale factor for images.
+        dl_generate_images (bool): Whether to generate images or not.
 
     Returns:
         DocumentConverter: The document converter.
     """
-    logger.info(f"Loading Docling document converter with {'full OCR' if full_ocr else 'fast OCR'}...")
+    if full_ocr:
+        _logger.info("Loading Docling document converter with full OCR...")
+    else:
+        _logger.info("Loading Docling document converter with fast OCR...")
+
     dl_converter = DocumentConverter(
         format_options={
             InputFormat.PDF: PdfFormatOption(
@@ -49,14 +67,14 @@ def get_document_converter(full_ocr: bool = False) -> DocumentConverter:
                     # ),
                     ocr_options=EasyOcrOptions(
                         force_full_page_ocr=full_ocr,
-                        lang=config.OCR_LANGUAGES,
-                        confidence_threshold=config.OCR_CONFIDENCE_THRESHOLD,
-                        bitmap_area_threshold=config.OCR_BITMAP_AREA_THRESHOLD
+                        lang=EASY_OCR_LANGUAGES,
+                        confidence_threshold=ocr_confidence_threshold,
+                        bitmap_area_threshold=ocr_bitmap_area_threshold
                     ),
-                    images_scale=config.IMAGES_SCALE,
-                    generate_page_images=full_ocr or config.DL_GENERATE_IMAGES,
-                    generate_picture_images=config.DL_GENERATE_IMAGES,
-                    generate_table_images=config.DL_GENERATE_IMAGES,
+                    images_scale=images_scale,
+                    generate_page_images=full_ocr or dl_generate_images,
+                    generate_picture_images=dl_generate_images,
+                    generate_table_images=dl_generate_images,
                     do_table_structure=True,
                     table_structure_options=TableStructureOptions(
                         do_cell_matching=True,
@@ -66,5 +84,5 @@ def get_document_converter(full_ocr: bool = False) -> DocumentConverter:
             )
         }
     )
-    logger.debug("Docling document converter loaded successfully.")
+    _logger.debug("Docling document converter loaded successfully.")
     return dl_converter

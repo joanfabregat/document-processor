@@ -24,9 +24,3 @@ VERSION: str = os.getenv("VERSION")
 BUILD_ID: str = os.getenv("BUILD_ID")
 COMMIT_SHA: str = os.getenv("COMMIT_SHA")
 
-# DL Converter config
-OCR_LANGUAGES = ["fr", "de", "es", "en"]
-OCR_CONFIDENCE_THRESHOLD = 0.01
-OCR_BITMAP_AREA_THRESHOLD = 0.1
-IMAGES_SCALE = 2.0
-DL_GENERATE_IMAGES = True
