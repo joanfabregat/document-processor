@@ -6,6 +6,7 @@
 # The Software is provided "as is", without warranty of any kind.
 
 import datetime
+import os
 import shutil
 import tempfile
 
@@ -84,29 +85,43 @@ async def process_document(
             detail="Invalid file type. Only PDF files are supported.",
         )
 
-    with tempfile.NamedTemporaryFile() as temp_file:
-        logger.debug(f"Creating temp file: {temp_file.name}")
-        # noinspection PyTypeChecker
-        shutil.copyfileobj(file.file, temp_file)
+    # If the file is larger than 50MB, save it to a temporary file
+    if file.size > 50 * 1024 * 1024:
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            logger.debug(f"Creating temp file: {temp_file.name}")
+            # noinspection PyTypeChecker
+            shutil.copyfileobj(file.file, temp_file)
+            bytes_or_path = temp_file.name
 
-        try:
-            content_extractor = ContentExtractor(bytes_or_path=temp_file.name, filename=file.filename)
+    # Else, read the file content directly
+    else:
+        bytes_or_path = file.file.read()
 
-            return models.ProcessResponse(
-                document=file.filename,
-                size=file.size,
-                content_type=file.content_type,
-                pages=content_extractor.extract_pages_model(
-                    first_page=params.first_page,
-                    last_page=params.last_page,
-                    include_page_screenshot=params.include_page_screenshot,
-                    include_slice_screenshot=params.include_slice_screenshot,
-                    image_format=params.image_format,
-                    image_quality=params.image_quality,
-                ),
-            )
-        except Exception as e:
-            logger.error(f"Error processing file: {str(e)}")
-            raise e
-            # raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}") from e
-    
+    try:
+        # Extract the specified range of pages from the PDF document
+        content_extractor = ContentExtractor(bytes_or_path=bytes_or_path, filename=file.filename)
+        pages = content_extractor.extract_pages_model(
+            first_page=params.first_page,
+            last_page=params.last_page,
+            include_page_screenshot=params.include_page_screenshot,
+            include_slice_screenshot=params.include_slice_screenshot,
+            image_format=params.image_format,
+            image_quality=params.image_quality,
+        )
+
+        # Extract the pages and slices
+        return models.ProcessResponse(
+            document=file.filename,
+            size=file.size,
+            content_type=file.content_type,
+            pages=pages,
+        )
+    except Exception as e:
+        logger.error(f"Error processing file: {str(e)}")
+        raise e
+        # raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}") from e
+
+    finally:
+        if isinstance(bytes_or_path, str) and os.path.exists(bytes_or_path):
+            logger.debug(f"Deleting temp file: {bytes_or_path}")
+            os.remove(bytes_or_path)
