@@ -7,10 +7,12 @@
 
 from functools import lru_cache
 
+from docling.backend.pypdfium2_backend import PyPdfiumDocumentBackend
 from docling.datamodel.pipeline_options import (
     PdfPipelineOptions,
     AcceleratorOptions,
     EasyOcrOptions,
+    TesseractOcrOptions,
     TableStructureOptions,
     TableFormerMode,
     AcceleratorDevice
@@ -56,6 +58,7 @@ def get_dl_converter(
     dl_converter = DocumentConverter(
         format_options={
             InputFormat.PDF: PdfFormatOption(
+                backend=PyPdfiumDocumentBackend,
                 pipeline_options=PdfPipelineOptions(
                     accelerator_options=AcceleratorOptions(
                         num_threads=config.THREADS,
@@ -67,7 +70,7 @@ def get_dl_converter(
                     #     # lang=["auto"],
                     #     lang=["fra", "eng", "deu", "spa"],
                     #     force_full_page_ocr=full_ocr,
-                    #     bitmap_area_threshold=.25
+                    #     bitmap_area_threshold=ocr_bitmap_area_threshold
                     # ),
                     ocr_options=EasyOcrOptions(
                         force_full_page_ocr=full_ocr,
