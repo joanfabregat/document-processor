@@ -6,9 +6,6 @@
 # The Software is provided "as is", without warranty of any kind.
 
 import datetime
-import os
-import shutil
-import tempfile
 
 from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -30,6 +27,7 @@ api = FastAPI(
     debug=config.ENV == "development",
 )
 
+# CORS middleware
 # noinspection PyTypeChecker
 api.add_middleware(
     CORSMiddleware,
@@ -51,8 +49,8 @@ async def root():
     return RedirectResponse(url="/docs")
 
 
-@api.get("/health", response_model=models.HealthResponse)
-async def health():
+@api.get("/health")
+async def health() -> models.HealthResponse:
     """
     Root endpoint.
     """
@@ -64,11 +62,11 @@ async def health():
     )
 
 
-@api.post("/process", response_model=models.ProcessResponse)
+@api.post("/process")
 async def process_document(
         file: UploadFile = File(..., description="The PDF document to process"),
         params: models.ProcessRequest = Depends(),
-):
+) -> models.ProcessResponse:
     """
     Extract slices from a PDF document.
 
@@ -85,26 +83,22 @@ async def process_document(
             detail="Invalid file type. Only PDF files are supported.",
         )
 
-    # If the file is larger than 50MB, save it to a temporary file
-    if file.size > 50 * 1024 * 1024:
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            logger.debug(f"Creating temp file: {temp_file.name}")
-            # noinspection PyTypeChecker
-            shutil.copyfileobj(file.file, temp_file)
-            bytes_or_path = temp_file.name
-
-    # Else, read the file content directly
-    else:
-        bytes_or_path = file.file.read()
+    file_bytes = file.file.read()
+    if not file_bytes:
+        raise HTTPException(
+            status_code=400,
+            detail="Empty file. Please upload a valid PDF document.",
+        )
 
     try:
         # Extract the specified range of pages from the PDF document
         content_extractor = ContentExtractor(
-            bytes_or_path=bytes_or_path,
+            bytes_or_path=file_bytes,
             filename=file.filename,
             images_scale=params.image_scale,
 
         )
+
         pages = content_extractor.extract_pages_model(
             first_page=params.first_page,
             last_page=params.last_page,
@@ -123,10 +117,4 @@ async def process_document(
         )
     except Exception as e:
         logger.error(f"Error processing file: {str(e)}")
-        raise e
-        # raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}") from e
-
-    finally:
-        if isinstance(bytes_or_path, str) and os.path.exists(bytes_or_path):
-            logger.debug(f"Deleting temp file: {bytes_or_path}")
-            os.remove(bytes_or_path)
+        raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}") from e
