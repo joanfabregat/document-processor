@@ -109,9 +109,7 @@ class ContentExtractor:
             *,
             first_page: int = 1,
             last_page: int = None,
-            include_page_screenshot: bool,
-            include_slice_screenshot: bool,
-            image_format: models.ImageFormat,
+            image_format: models.ImageFormat | None,
             image_quality: int
     ) -> list[models.Page]:
         """
@@ -120,8 +118,6 @@ class ContentExtractor:
         Args:
             first_page: The first page to extract.
             last_page: The last page to extract. If None, all pages are extracted.
-            include_page_screenshot: Whether to include the page screenshot.
-            include_slice_screenshot: Whether to include the slice screenshot.
             image_format: The format of the image.
             image_quality: The quality of the image.
 
@@ -134,8 +130,6 @@ class ContentExtractor:
             if page_extractor:
                 page = page_extractor.get_model(
                     slice_no=slice_no,
-                    include_page_screenshot=include_page_screenshot,
-                    include_slice_screenshot=include_slice_screenshot,
                     image_format=image_format,
                     image_quality=image_quality
                 )

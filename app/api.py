@@ -102,8 +102,6 @@ async def process_document(
         pages = content_extractor.extract_pages_model(
             first_page=params.first_page,
             last_page=params.last_page,
-            include_page_screenshot=params.include_page_screenshot,
-            include_slice_screenshot=params.include_slice_screenshot,
             image_format=params.image_format,
             image_quality=params.image_quality,
         )

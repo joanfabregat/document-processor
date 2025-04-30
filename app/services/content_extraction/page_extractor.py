@@ -79,9 +79,7 @@ class PageExtractor:
             self,
             *,
             slice_no: int,
-            include_page_screenshot: bool,
-            include_slice_screenshot: bool,
-            image_format: models.ImageFormat,
+            image_format: models.ImageFormat | None,
             image_quality: int
     ) -> models.Page:
         """
@@ -89,8 +87,6 @@ class PageExtractor:
 
         Args:
             slice_no: The slice number to start from.
-            include_page_screenshot: Whether to include the page screenshot.
-            include_slice_screenshot: Whether to include the slice screenshot.
             image_format: The format of the image.
             image_quality: The quality of the image.
 
@@ -105,14 +101,13 @@ class PageExtractor:
         )
 
         # Extract the page screenshot if requested
-        if include_page_screenshot and (screenshot := self.get_screenshot()):
+        if image_format is not None and (screenshot := self.get_screenshot()):
             page.screenshot = screenshot.get_model(image_format=image_format, image_quality=image_quality)
 
         # Extract the slices from the page
         for _, slice_extractor in self.get_slices():
             slice_ = slice_extractor.get_model(
                 slice_no=slice_no,
-                include_slice_screenshot=include_slice_screenshot,
                 image_format=image_format,
                 image_quality=image_quality
             )

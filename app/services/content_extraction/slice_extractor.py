@@ -161,8 +161,7 @@ class SliceExtractor:
             self,
             *,
             slice_no: int,
-            include_slice_screenshot: bool,
-            image_format: models.ImageFormat,
+            image_format: models.ImageFormat | None,
             image_quality: int
     ) -> models.Slice:
         """
@@ -170,7 +169,6 @@ class SliceExtractor:
 
         Args:
             slice_no: The slice number to start from.
-            include_slice_screenshot: Whether to include the slice screenshot.
             image_format: The format of the image (default: WEBP).
             image_quality: The quality of the image (1-100, default: 80).
 
@@ -192,7 +190,7 @@ class SliceExtractor:
         )
 
         # Extract the slice screenshot if requested
-        if include_slice_screenshot and (screenshot := self.get_screenshot()):
+        if image_format is not None and (screenshot := self.get_screenshot()):
             slice_.screenshot = screenshot.get_model(image_format=image_format, image_quality=image_quality)
 
         # Extract the positions of the slice

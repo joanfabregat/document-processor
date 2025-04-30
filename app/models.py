@@ -16,10 +16,12 @@ class OcrPipeline(str, enum.Enum):
     FULL = "full"
     HYBRID = "hybrid"
 
-class ImageFormat(str, enum.Enum):
+
+class ImageFormat(enum.Enum):
     JPEG = "jpeg"
     PNG = "png"
     WEBP = "webp"
+
 
 class Image(BaseModel):
     data: str = Field(..., description="Base64 encoded image data")
@@ -75,9 +77,7 @@ class ProcessRequest(BaseModel):
     ocr_pipeline: OcrPipeline = Field(default=OcrPipeline.HYBRID, description="The OCR pipeline to use")
     first_page: int = Field(default=1, description="The first page number to process")
     last_page: int | None = Field(default=None, description="The last page number to process")
-    include_page_screenshot: bool = Field(default=True, description="Whether to include a screenshot of the page")
-    include_slice_screenshot: bool = Field(default=True, description="Whether to include a screenshot of the slice")
-    image_format: ImageFormat = Field(default=ImageFormat.WEBP, description="The image format for the screenshots")
+    image_format: ImageFormat |None = Field(default=ImageFormat.WEBP, description="The image format for the screenshots")
     image_quality: int = Field(default=80, description="The quality of the image (0-100)")
     image_scale: float = Field(default=2.0, description="The scale factor for the images")
 
