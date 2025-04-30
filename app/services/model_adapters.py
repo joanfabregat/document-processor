@@ -46,7 +46,7 @@ class PageModelAdapter:
             The model of the page as a DoclingDocument object.
         """
         page = models.Page(
-            page_no=extractor.page_no,
+            page_num=extractor.page_num,
             width=extractor.get_width(),
             height=extractor.get_height(),
             screenshot=None,
@@ -97,7 +97,7 @@ class SliceModelAdapter:
         """
         # Extract the slice data
         slice_ = models.Slice(
-            slice_no=extractor.slice_no,
+            slice_num=extractor.slice_num,
             level=extractor.level,
             ref=extractor.get_ref(),
             parent_ref=extractor.get_parent_ref(),
@@ -147,7 +147,7 @@ class SlicePositionModelAdapter:
             The slice position model with data extracted from the document.
         """
         return models.Position(
-            page_no=extractor.get_page_no(),
+            page_num=extractor.get_page_num(),
             top=extractor.get_top(self.bbox_precision),
             right=extractor.get_right(self.bbox_precision),
             bottom=extractor.get_bottom(self.bbox_precision),

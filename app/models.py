@@ -32,7 +32,7 @@ class Image(BaseModel):
 
 class Position(BaseModel):
     """Represents the position of a slice in a document."""
-    page_no: int = Field(..., description="The page number of the slice")
+    page_num: int = Field(..., description="The page number of the slice")
     top: float = Field(..., description="The top position of the slice")
     right: float = Field(..., description="The right position of the slice")
     bottom: float = Field(..., description="The bottom position of the slice")
@@ -43,7 +43,7 @@ class Position(BaseModel):
 class Slice(BaseModel):
     """Represents a slice of content extracted from a document."""
 
-    slice_no: int = Field(..., description="The number of the slice in the document")
+    slice_num: int = Field(..., description="The number of the slice in the document")
     level: int = Field(..., description="The level of the slice in the document hierarchy")
     ref: str = Field(..., description="The reference ID of the slice")
     parent_ref: str = Field(..., description="The reference ID of the parent slice")
@@ -58,7 +58,7 @@ class Slice(BaseModel):
 
 class Page(BaseModel):
     """Represents a page in a document."""
-    page_no: int = Field(..., description="The page number of the document")
+    page_num: int = Field(..., description="The page number of the document")
     width: float = Field(..., description="The width of the page")
     height: float = Field(..., description="The height of the page")
     screenshot: Image | None = Field(None, description="The height of the page")

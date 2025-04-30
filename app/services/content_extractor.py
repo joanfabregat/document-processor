@@ -26,21 +26,21 @@ class PageExtractor:
     PageExtractor is responsible for extracting information from a page in a Docling document.
     """
 
-    def __init__(self, dl_document: DoclingDocument, *, page_no: int = 0, first_slice_no: int = 1):
+    def __init__(self, dl_document: DoclingDocument, *, page_num: int = 0, first_slice_num: int = 1):
         """
         Initializes the PageExtractor with a Docling document and page number.
 
         Args:
             dl_document: The Docling document to extract from.
-            page_no: The page number to extract from (1-indexed).
-            first_slice_no: The number of the first extracted slice.
+            page_num: The page number to extract from (1-indexed).
+            first_slice_num: The number of the first extracted slice.
         """
-        if not page_no in dl_document.pages:
-            raise ValueError(f"Page {page_no} not found in Docling document")
+        if not page_num in dl_document.pages:
+            raise ValueError(f"Page {page_num} not found in Docling document")
         self.dl_document = dl_document
-        self.page_no = page_no
-        self.page = dl_document.pages[page_no]
-        self.first_slice_no = first_slice_no
+        self.page_num = page_num
+        self.page = dl_document.pages[page_num]
+        self.first_slice_num = first_slice_num
         self._logger = logger.getChild(__name__)
 
     def get_width(self) -> float:
@@ -62,7 +62,7 @@ class PageExtractor:
         Returns:
             The screenshot as an ImageExtractor object or None if not applicable.
         """
-        self._logger.debug("Getting screenshot for page %s", self.page_no)
+        self._logger.debug("Getting screenshot for page %s", self.page_num)
         if not self.page.image or not self.page.image.pil_image:
             return None
         return ImageExtractor(self.page.image.pil_image)
@@ -74,7 +74,7 @@ class PageExtractor:
         Returns:
             bool: True if the page contains text slices, False otherwise.
         """
-        for dl_item, level in self.dl_document.iterate_items(page_no=self.page_no):
+        for dl_item, level in self.dl_document.iterate_items(page_num=self.page_num):
             if not isinstance(dl_item, (TextItem, TableItem, PictureItem)):
                 continue
             if isinstance(dl_item, TextItem) and dl_item.text:
@@ -89,14 +89,18 @@ class PageExtractor:
             A generator yielding SliceExtractor objects for each slice.
         """
 
-        slice_no = self.first_slice_no
-        self._logger.debug("Getting slices for page %s", self.page_no)
-        for dl_item, level in self.dl_document.iterate_items(page_no=self.page_no):
+        slice_num = self.first_slice_num
+        self._logger.debug("Getting slices for page %s", self.page_num)
+        for dl_item, level in self.dl_document.iterate_items(page_num=self.page_num):
             if not isinstance(dl_item, (TextItem, TableItem, PictureItem)):
                 continue
-            slice_extractor = SliceExtractor(dl_document=self.dl_document, dl_item=dl_item, level=level,
-                                             slice_no=slice_no)
-            yield slice_no, slice_extractor
+            slice_extractor = SliceExtractor(
+                dl_document=self.dl_document,
+                dl_item=dl_item,
+                level=level,
+                slice_num=slice_num
+            )
+            yield slice_num, slice_extractor
 
 
 class ContentExtractor:
@@ -149,17 +153,17 @@ class ContentExtractor:
         self._logger.debug(f"Processing page range %s to %s", first_page, last_page)
 
         # noinspection PyTypeChecker
-        for page_no in range(first_page, last_page + 1):
-            page = self.extract_page(page_no=page_no)
-            yield page_no, page
+        for page_num in range(first_page, last_page + 1):
+            page = self.extract_page(page_num=page_num)
+            yield page_num, page
 
-    def extract_page(self, page_no: int, first_slice_no: int = 1) -> PageExtractor | None:
+    def extract_page(self, page_num: int, first_slice_num: int = 1) -> PageExtractor | None:
         """
         Process a PDF file and extract a page and slices.
 
         Args:
-            page_no: The page number to extract.
-            first_slice_no: Number of the first extracted slice.
+            page_num: The page number to extract.
+            first_slice_num: Number of the first extracted slice.
 
         Returns:
             The page with slices extracted from the document.
@@ -169,19 +173,19 @@ class ContentExtractor:
             try:
                 result = converter.convert(
                     source=self._get_dl_source(),
-                    page_range=(page_no, page_no),
+                    page_range=(page_num, page_num),
                     raises_on_error=False,
                 )
             except Exception as e:
-                self._logger.error("Failed to convert page %s: %s", page_no, e)
+                self._logger.error("Failed to convert page %s: %s", page_num, e)
                 continue
 
             if not result.document:
-                self._logger.warning("Failed to convert page %s to Docling document", page_no)
+                self._logger.warning("Failed to convert page %s to Docling document", page_num)
                 continue
 
             # Extract the page using the converter
-            page = PageExtractor(result.document, page_no=page_no, first_slice_no=first_slice_no)
+            page = PageExtractor(result.document, page_num=page_num, first_slice_num=first_slice_num)
 
             # Returns the page is it has text slices or is the last converter
             if page.has_text_slices() or converter == self._dl_converters[-1]:
@@ -248,7 +252,7 @@ class SliceExtractor:
             dl_document: DoclingDocument,
             dl_item: DocItem,
             *,
-            slice_no: int = 0,
+            slice_num: int = 0,
             level: int
     ):
         """
@@ -257,12 +261,12 @@ class SliceExtractor:
         Args:
             dl_document: The Docling document to extract from.
             dl_item: The item to extract from.
-            slice_no: The number of the slice.
+            slice_num: The number of the slice.
             level: The level of the item in the document.
         """
         self.dl_document = dl_document
         self.dl_item = dl_item
-        self.slice_no = slice_no
+        self.slice_num = slice_num
         self.level = level
         self._logger = logger.getChild(__name__)
 
@@ -421,7 +425,7 @@ class SlicePositionExtractor:
         """
         self.prov = prov
 
-    def get_page_no(self) -> int:
+    def get_page_num(self) -> int:
         """Returns the page number of the item."""
         return self.prov.page_no
 
