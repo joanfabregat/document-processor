@@ -7,12 +7,13 @@
 
 import datetime
 
-from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
 from app import models, logger, config
-from app.services.content_extraction import ContentExtractor
+from app.services.content_extractor import ContentExtractor
+from app.services.model_adapters import PageModelAdapter, SliceModelAdapter, ImageModelAdapter
 
 start_dt = datetime.datetime.now()
 
@@ -52,7 +53,7 @@ async def root():
 @api.get("/health")
 async def health() -> models.HealthResponse:
     """
-    Root endpoint.
+    Health check endpoint.
     """
     return models.HealthResponse(
         version=config.VERSION,
@@ -65,24 +66,30 @@ async def health() -> models.HealthResponse:
 @api.post("/process")
 async def process_document(
         file: UploadFile = File(..., description="The PDF document to process"),
-        params: models.ProcessRequest = Depends(),
+        ocr_pipeline: models.OcrPipeline = Form(default=models.OcrPipeline.HYBRID,
+                                                description="The OCR pipeline to use"),
+        first_page: int = Form(default=1, description="The first page number to process"),
+        last_page: int | None = Form(default=None, description="The last page number to process"),
+        extract_pages_screenshot: bool = Form(default=True,
+                                              description="Whether to extract the screenshot of the pages"),
+        extract_slices_screenshot: bool = Form(default=True,
+                                               description="Whether to extract the screenshot of the slices"),
+        image_format: models.ImageFormat = Form(default=models.ImageFormat.WEBP,
+                                                description="The image format for the screenshots"),
+        image_quality: int = Form(default=80, description="The quality of the image (0-100)"),
+        image_scale: float = Form(default=2.0, description="The scale factor for the images"),
 ) -> models.ProcessResponse:
     """
     Extract slices from a PDF document.
-
-    Args:
-        file: The PDF document to process.
-        params: The parameters for processing the document.
-
-    Returns:
-        The list of slices extracted from the document.
     """
+    # Check if the file is a PDF
     if file.content_type != "application/pdf":
         raise HTTPException(
             status_code=400,
             detail="Invalid file type. Only PDF files are supported.",
         )
 
+    # Read the file content
     file_bytes = file.file.read()
     if not file_bytes:
         raise HTTPException(
@@ -91,22 +98,36 @@ async def process_document(
         )
 
     try:
-        # Extract the specified range of pages from the PDF document
+        # Initialize the content extractor
         content_extractor = ContentExtractor(
+            ocr_pipeline=ocr_pipeline,
             bytes_or_path=file_bytes,
             filename=file.filename,
-            images_scale=params.image_scale,
-
+            images_scale=image_scale,
         )
 
-        pages = content_extractor.extract_pages_model(
-            first_page=params.first_page,
-            last_page=params.last_page,
-            image_format=params.image_format,
-            image_quality=params.image_quality,
+        # Initialize the model adapters
+        image_model_adapter = ImageModelAdapter(
+            image_format=image_format,
+            image_quality=image_quality
+        )
+        slice_model_adapter = SliceModelAdapter(
+            image_model_adapter=image_model_adapter,
+            extract_screenshot=extract_slices_screenshot
+        )
+        page_model_adapter = PageModelAdapter(
+            slice_model_adapter=slice_model_adapter,
+            image_model_adapter=image_model_adapter,
+            extract_screenshot=extract_pages_screenshot
         )
 
-        # Extract the pages and slices
+        # Extract the specified range of pages from the PDF document
+        pages = []
+        for _, page in content_extractor.extract_pages(first_page, last_page):
+            if page:
+                page_model = page_model_adapter.get_model(page)
+                pages.append(page_model)
+
         return models.ProcessResponse(
             document=file.filename,
             size=file.size,
