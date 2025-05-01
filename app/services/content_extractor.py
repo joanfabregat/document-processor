@@ -74,7 +74,7 @@ class PageExtractor:
         Returns:
             bool: True if the page contains text slices, False otherwise.
         """
-        for dl_item, level in self.dl_document.iterate_items(page_num=self.page_num):
+        for dl_item, level in self.dl_document.iterate_items(page_no=self.page_num):
             if not isinstance(dl_item, (TextItem, TableItem, PictureItem)):
                 continue
             if isinstance(dl_item, TextItem) and dl_item.text:
@@ -91,7 +91,7 @@ class PageExtractor:
 
         slice_num = self.first_slice_num
         self._logger.debug("Getting slices for page %s", self.page_num)
-        for dl_item, level in self.dl_document.iterate_items(page_num=self.page_num):
+        for dl_item, level in self.dl_document.iterate_items(page_no=self.page_num):
             if not isinstance(dl_item, (TextItem, TableItem, PictureItem)):
                 continue
             slice_extractor = SliceExtractor(
