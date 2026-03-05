@@ -9,7 +9,7 @@ from io import BytesIO
 from pathlib import Path
 from typing import Generator
 
-import pymupdf
+import pypdfium2
 from docling.datamodel.base_models import DocumentStream
 
 from app import logger, models
@@ -145,10 +145,7 @@ class ContentExtractor:
         Returns:
             The number of pages in the PDF document.
         """
-        if isinstance(bytes_or_path, (str, Path)):
-            handler = pymupdf.open(filename=bytes_or_path)
-        else:
-            handler = pymupdf.open(stream=bytes_or_path)
-
-        with handler as pdf:
-            return len(pdf)
+        pdf_doc = pypdfium2.PdfDocument(bytes_or_path)
+        pages_count = len(pdf_doc)
+        pdf_doc.close()
+        return pages_count

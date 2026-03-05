@@ -12,7 +12,6 @@ from docling.datamodel.pipeline_options import (
     PdfPipelineOptions,
     AcceleratorOptions,
     EasyOcrOptions,
-    TesseractOcrOptions,
     TableStructureOptions,
     TableFormerMode,
     AcceleratorDevice
